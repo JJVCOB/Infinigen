@@ -1,0 +1,47 @@
+# ---- Build output ----------------------------------------------------------
+# Everything CMake generates. Nothing in here belongs in version control:
+# it is machine-specific, it is enormous, and it is reproducible from source.
+build/
+out/
+cmake-build-*/
+
+# ---- Fetched dependencies --------------------------------------------------
+# FetchContent puts SDL inside build/, so the line above already covers it.
+# Listed explicitly in case you ever relocate FETCHCONTENT_BASE_DIR.
+_deps/
+
+# ---- IDE and editor --------------------------------------------------------
+.vs/
+.vscode/
+!.vscode/settings.json
+.idea/
+*.user
+*.sln
+*.vcxproj*
+CMakeUserPresets.json
+
+# ---- Compiler and linker artefacts -----------------------------------------
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.exp
+
+# ---- OS noise --------------------------------------------------------------
+.DS_Store
+Thumbs.db
+
+# ---- Profiler and sanitizer output -----------------------------------------
+# Week 2 onward. Reports are evidence, not source. Paste findings into your
+# writeups instead of committing raw dumps.
+*.trace
+*.heaptrack.*
+callgrind.out.*
+massif.out.*
+perf.data*
