@@ -22,7 +22,22 @@ Window::Window(const char* title, i32 width, i32 height) {
     //      SDL_GetError() to stderr. Do not throw. Do not silently continue.
     //
     // Read the return value of every SDL call. All of them can fail.
-    (void)title; (void)width; (void)height;
+    if(!SDL_InitSubSystem(SDL_INIT_VIDEO))
+    {
+        std::print(stderr, "Failed to Initialize Video\n", SDL_GetError());
+        return;
+    }
+
+    videoInitialized = true;
+
+    // Change SDL_WINDOW_RESIZABLE to 0 if getting issues
+    if (!SDL_CreateWindowAndRenderer(title, width, height, SDL_WINDOW_RESIZABLE, &m_window, &m_renderer))
+    {
+        std::print(stderr, "Failed to Create Window & Renderer\n", SDL_GetError());
+        m_window = nullptr;
+        m_renderer = nullptr;
+        return;
+    }
 }
 
 Window::~Window() {
@@ -32,20 +47,67 @@ Window::~Window() {
     // Ask yourself what happens if construction failed halfway through and
     // one of these pointers is null. Then go read what SDL does when handed
     // a null pointer, rather than guessing.
+    if (m_renderer)
+    {
+        SDL_DestroyRenderer(m_renderer);
+        m_renderer = nullptr;
+    }
+
+    if (m_window)
+    {
+        SDL_DestroyWindow(m_window);
+        m_window = nullptr;
+    }
+
+    if (videoInitialized)
+    {
+        SDL_Quit();
+        videoInitialized = false;
+    }
 }
 
 bool Window::IsValid() const {
-    // TODO(week1)
-    return false;
+    return m_window != nullptr && m_renderer != nullptr;
 }
 
 void Window::Clear(u8 r, u8 g, u8 b) {
     // TODO(week1): SDL_SetRenderDrawColor, then SDL_RenderClear.
-    (void)r; (void)g; (void)b;
+    if (!m_renderer)
+    {
+        return;
+    }
+
+    if (!SDL_SetRenderDrawColor(m_renderer, r, g, b, SDL_ALPHA_OPAQUE))
+    {
+        std::print(stderr, "Failed to Draw Color\n", SDL_GetError());
+        return;
+    }
+
+    //if (!SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND))
+    //{
+    //    std::print(stderr, "Failed to Set Blend Mode\n", SDL_GetError());
+    //    return;
+    //}
+
+    if (!SDL_RenderClear(m_renderer))
+    {
+        std::print(stderr, "Failed to Clear Renderer\n", SDL_GetError());
+        return;
+    }
 }
 
 void Window::Present() {
     // TODO(week1): SDL_RenderPresent.
+    if (!m_renderer)
+    {
+        return;
+    }
+
+    if (!SDL_RenderPresent(m_renderer))
+    {
+        std::print(stderr, "Failed to Present Renderer\n", SDL_GetError());
+        return;
+    }
 }
 
 } // namespace eng
