@@ -46,6 +46,9 @@ public:
     // TODO(week1): push the finished frame to the screen.
     void Present();
 
+    // Add change title func
+    void SetTitle(const char* title);
+
     // Temporary escape hatch so the sandbox can poll events in Week 1.
     SDL_Renderer* RawRenderer() const { return m_renderer; }
 

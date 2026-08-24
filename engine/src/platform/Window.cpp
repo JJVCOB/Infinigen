@@ -83,12 +83,6 @@ void Window::Clear(u8 r, u8 g, u8 b) {
         return;
     }
 
-    //if (!SDL_SetRenderDrawBlendMode(m_renderer, SDL_BLENDMODE_BLEND))
-    //{
-    //    std::print(stderr, "Failed to Set Blend Mode\n", SDL_GetError());
-    //    return;
-    //}
-
     if (!SDL_RenderClear(m_renderer))
     {
         std::print(stderr, "Failed to Clear Renderer\n", SDL_GetError());
@@ -106,6 +100,20 @@ void Window::Present() {
     if (!SDL_RenderPresent(m_renderer))
     {
         std::print(stderr, "Failed to Present Renderer\n", SDL_GetError());
+        return;
+    }
+}
+
+void Window::SetTitle(const char* title) {
+    // TODO(week1): SDL_RenderPresent.
+    if (!m_renderer)
+    {
+        return;
+    }
+
+    if (!SDL_SetWindowTitle(m_window, title))
+    {
+        std::print(stderr, "Failed to Set Title\n", SDL_GetError());
         return;
     }
 }

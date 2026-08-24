@@ -19,7 +19,9 @@ int main(int argc, char** argv) {
     // TODO(week1): Initialize a SDL3 Window. Check if it IsValid(). Bail with a message
     // and a non-zero exit code if it failed.
 
-    eng::Window window("My Epic Game", 1280, 720);
+    std::string wTitle = "My Epic Game";
+
+    eng::Window window(wTitle.c_str(), 1280, 720);
 
     if (!window.IsValid())
     {
@@ -28,17 +30,15 @@ int main(int argc, char** argv) {
     }
 
     bool running = true;
+    int color = 0;
+    int maxfps = 120;
+    bool capfps = true;
+    int fps = 0;
+    int lastTime = 0;
 
     while (running) {
-        // TODO(week1): drain the SDL event queue with SDL_PollEvent.
-		//   Set running = false on SDL_EVENT_QUIT or SDL_EVENT_WINDOW_CLOSE_REQUESTED.
-		//   Do nothing for any other event type.
-        //
-        // Note the shape of this loop: poll until the queue is EMPTY, once per
-        // frame. Handling one event per frame is a bug that looks like input
-        // lag.
+        int currentTick = SDL_GetTicks();
 
-        // TODO(week1): clear to a colour of your choosing, then present.
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
@@ -54,8 +54,30 @@ int main(int argc, char** argv) {
             }
         }
 
-        window.Clear(0, 0, 255);
+        // Blue
+        //window.Clear(62, 54, 209);
+        // Random Color
+        //window.Clear(rand() % 255, rand() % 255, rand() % 255);
+        // Smooth Changing Color
+        color += 1;
+        window.Clear(color % 255, color/2 % 255, color/3 % 255);
         window.Present();
+
+        if (capfps) // Cap FPS if cap is turned on
+        {
+            SDL_Delay(1000 / maxfps);
+        }
+
+        fps++; // Add to FPS
+        int deltaTime = SDL_GetTicks() - currentTick; // Get Delta Time
+
+        if (currentTick > lastTime + 1000) // Check, reset & display FPS
+        {
+            lastTime = currentTick;
+            std::string fpsStr = wTitle + " | FPS: " + std::format("{}", fps);
+            window.SetTitle(fpsStr.c_str());
+            fps = 0;
+        }
     }
 
     std::printf("Clean exit.\n");
