@@ -9,9 +9,26 @@
 // =============================================================================
 
 #include <engine/platform/Window.h>
-
 #include <SDL3/SDL.h>
+
+//define _CRTDBG_MAP_ALLOC
 #include <print>
+
+//int x[100];
+//
+//int main()
+//{
+//#ifdef __SANITIZE_ADDRESS__
+//    std::print("MSVC AddressSanitizer enabled");
+//#else
+//    std::print("MSVC AddressSanitizer not enabled");
+//#endif
+//
+//
+//    std::print("Hello!\n");
+//    x[100] = 5; // Boom!
+//    return 0;
+//}
 
 int main(int argc, char** argv) {
     (void)argc; (void)argv;   // Week 1 stretch goal 3 gives these a purpose.
@@ -31,7 +48,7 @@ int main(int argc, char** argv) {
 
     bool running = true;
     int color = 0;
-    int maxfps = 120;
+    int maxfps = 60;
     bool capfps = true;
     int fps = 0;
     int lastTime = 0;
@@ -69,7 +86,7 @@ int main(int argc, char** argv) {
         }
 
         fps++; // Add to FPS
-        int deltaTime = SDL_GetTicks() - currentTick; // Get Delta Time
+        //int deltaTime = SDL_GetTicks() - currentTick; // Get Delta Time
 
         if (currentTick > lastTime + 1000) // Check, reset & display FPS
         {

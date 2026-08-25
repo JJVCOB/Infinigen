@@ -22,6 +22,8 @@ struct SDL_Renderer;   // without dragging all of SDL into every file
 namespace eng {
 
 class Window {
+    friend class EditorGui;
+
 public:
     // TODO(week1): construct a window of the given size and title.
     Window(const char* title, i32 width, i32 height);
@@ -55,7 +57,7 @@ public:
 private:
     SDL_Window*   m_window   = nullptr;
     SDL_Renderer* m_renderer = nullptr;
-    bool videoInitialized = false;
+    bool sdl_videoInitialized = false;
 };
 
 } // namespace eng
