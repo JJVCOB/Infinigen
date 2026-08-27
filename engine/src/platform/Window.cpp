@@ -31,7 +31,7 @@ Window::Window(const char* title, i32 width, i32 height) {
 
     sdl_videoInitialized = true;
 
-    if (!SDL_CreateWindowAndRenderer(title, width, height, 0, &m_window, &m_renderer))
+    if (!SDL_CreateWindowAndRenderer(title, width, height, SDL_WINDOW_RESIZABLE, &m_window, &m_renderer))
     {
 		std::print(stderr, "Failed to create window and renderer\n", SDL_GetError());
 		
