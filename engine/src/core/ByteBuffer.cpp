@@ -25,13 +25,14 @@ namespace eng {
 
 
     ByteBuffer::ByteBuffer(const ByteBuffer& other) {
-        m_size = other.m_size;
-        m_data = new u8[m_size];
-        std::memcpy(m_data, other.m_data, m_size); // #2 fix memory copying
+        //m_size = other.m_size;
+        //m_data = new u8[m_size];
+        //std::memcpy(m_data, other.m_data, m_size); // method 1
+        *this = other; // #2 fix memory copying method 2
     }
 
     ByteBuffer::~ByteBuffer() {
-        delete m_data;
+        delete[] m_data; // #4 add [] for array
         m_data = nullptr;
         m_size = 0;
     }
@@ -57,7 +58,7 @@ namespace eng {
         if (offset + count > m_size) {
             return false;
         }
-        std::memcpy(m_data + offset, src, sizeof(src));
+        std::memcpy(m_data + offset, src, count); // #5 use count instead of sizeof(src)
         return true;
     }
 
@@ -68,7 +69,7 @@ namespace eng {
     }
 
     const char* DescribeBuffer(const ByteBuffer& buffer) {
-        static thread_local char text[64];
+        static char text[64]; // make static
         std::snprintf(text, sizeof(text), "ByteBuffer{ size=%zu }", buffer.Size());
         return text;
     }
