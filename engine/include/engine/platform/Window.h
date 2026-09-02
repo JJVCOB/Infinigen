@@ -1,63 +1,90 @@
 #pragma once
 
-// =============================================================================
-//  WEEK 1 TEMPLATE - you implement this.
+// ============================================================================
+//  Window.h - the actual operating-system window the game appears in.
 //
-//  This header exists to give you the Ch. 2.2 exercise in a form you will
-//  actually keep: a class DECLARED here and DEFINED in Window.cpp. Read the
-//  declaration/definition distinction in the chapter, then notice that this
-//  file promises things it does not contain. The linker is what checks that
-//  promise, and it checks it much later than the compiler does.
+//  One of these exists for the whole program. It owns two things that SDL
+//  gives us: the window itself, and the "renderer" attached to it (SDL's name
+//  for the object that draws into a window).
 //
-//  Deliberately holding raw SDL pointers is wrong, and we will fix it.
-//  Leave it wrong for now as the conversion is more instructive
-//  when you have working code to convert.
-// =============================================================================
+//  NOTICE WHAT IS NOT IN THIS HEADER: the word SDL. Nothing outside the
+//  platform layer needs to know which library opens the window, and keeping
+//  that name out of the public headers is what would make swapping SDL for
+//  something else an edit to a handful of .cpp files rather than to the whole
+//  engine.
+//
+//  WHY COPYING A WINDOW IS FORBIDDEN
+//  A Window owns a resource that belongs to the operating system. If you could
+//  copy one, both copies would refer to the SAME OS window, and both would try
+//  to close it when they were destroyed - closing something twice. There is no
+//  sensible meaning for "a second copy of this window", so the class refuses
+//  to compile the attempt (see the `= delete` lines below).
+// ============================================================================
 
-#include <engine/core/Types.h>
+#include <engine/platform/SdlHandles.h>
 
-struct SDL_Window;     // forward declaration: we promise these types exist
-struct SDL_Renderer;   // without dragging all of SDL into every file
+#include <string>
 
 namespace eng {
 
 class Window {
-    friend class EditorGui;
-
 public:
-    // TODO(week1): construct a window of the given size and title.
-    Window(const char* title, i32 width, i32 height);
+    // Opens a window of the given size with the given title.
+    //
+    // If anything fails - no display attached, a driver problem - the object
+    // is left INVALID rather than half-built, an explanation is written to the
+    // log, and IsValid() returns false. No exception is thrown: a display that
+    // will not open is a problem with the machine, not a bug in the code, and
+    // the caller should be able to react to it and exit tidily.
+    Window(const char* title, int width, int height);
 
-    // TODO(week1): destroy the renderer, then the window, then quit SDL video.
-    // Order matters. Get it backwards and you will find out at shutdown.
+    // Closes the renderer first and then the window, in that order. A window
+    // destroyed out from under its own renderer is a crash.
     ~Window();
-
-    // TODO(week1): why are these deleted? Write a one-line comment answering
-    // that, and be ready to say it out loud. Hint: what would happen if a
-    // Window were copied and both copies ran their destructor?
 
     Window(const Window&)            = delete;
     Window& operator=(const Window&) = delete;
 
-    // TODO(week1): true if construction succeeded.
     bool IsValid() const;
 
-    // TODO(week1): fill the whole window with one colour.
-    void Clear(u8 r, u8 g, u8 b);
-
-    // TODO(week1): push the finished frame to the screen.
-    void Present();
-
-    // Add change title func
+    int  Width() const;
+    int  Height() const;
     void SetTitle(const char* title);
 
-    // Temporary escape hatch so the sandbox can poll events in Week 1.
-    SDL_Renderer* RawRenderer() const { return m_renderer; }
+    // Fills the whole window with one colour. Each channel is 0-255, which is
+    // why they are `unsigned char` - that type holds exactly 0 to 255.
+    void Clear(unsigned char r, unsigned char g, unsigned char b);
+
+    // Shows the finished frame. Nothing drawn this frame is visible until this
+    // is called.
+    void Present();
+
+    // ---------------------------------------------------------------------
+    //  Engine-internal access to the underlying SDL objects.
+    //
+    //  Three parts of the engine legitimately need them: the editor GUI layer,
+    //  the drawing layer, and the texture loader. All three live inside the
+    //  engine.
+    //
+    //  They are returned as `void*` on purpose. Naming the SDL types here
+    //  would put SDL back into the engine's public interface, which is exactly
+    //  what this header is arranged to avoid. A `void*` says "this is plumbing,
+    //  not part of the API" about as loudly as C++ can.
+    //
+    //  Game code never needs either of these.
+    // ---------------------------------------------------------------------
+    void* NativeWindowHandle() const;
+    void* NativeRendererHandle() const;
 
 private:
-    SDL_Window*   m_window   = nullptr;
-    SDL_Renderer* m_renderer = nullptr;
-    bool sdl_videoInitialized = false;
+    // These two are declared in this order for a reason. C++ destroys members
+    // in the REVERSE of their declaration order, so m_renderer (declared
+    // second) is destroyed first - which is the order SDL requires.
+    WindowPtr   m_window;
+    RendererPtr m_renderer;
+
+    bool        m_videoInitialised = false;
+    std::string m_title;
 };
 
 } // namespace eng

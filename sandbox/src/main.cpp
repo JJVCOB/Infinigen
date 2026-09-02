@@ -1,102 +1,169 @@
-// =============================================================================
-//  WEEK 1 TEMPLATE - you implement this.
+// ============================================================================
+//  main.cpp - the game, running on its own with no editor attached.
 //
-//  The naive 'while' loop. Poll, clear, present, repeat. It is naive in a 
-//  specific, nameable way: it runs the simulation as fast as the machine 
-//  allows, so the game runs at a different speed on different hardware. We 
-//  will implement a fixed timestep and an accumulator. Until then, naive is 
-//  correct; do not try to fix it early.
-// =============================================================================
-
-#include <engine/platform/Window.h>
-#include <SDL3/SDL.h>
-
-//define _CRTDBG_MAP_ALLOC
-#include <print>
-
-//int x[100];
+//  This is the program a finished game would ship as. It links the engine and
+//  cannot reach SDL, because the engine keeps SDL to itself.
 //
-//int main()
-//{
-//#ifdef __SANITIZE_ADDRESS__
-//    std::print("MSVC AddressSanitizer enabled");
-//#else
-//    std::print("MSVC AddressSanitizer not enabled");
-//#endif
+//  The whole loop is four calls:
 //
+//      while (engine.BeginFrame()) {   // read input, work out how many steps
+//          engine.Simulate();          // run those steps
+//          engine.RenderFrame();       // draw
+//          engine.PresentFrame();      // show it
+//      }
 //
-//    std::print("Hello!\n");
-//    x[100] = 5; // Boom!
-//    return 0;
-//}
+//  Engine::Run() is exactly that loop, and the default mode below just calls
+//  it. The --game mode writes the loop out by hand so that the sample game can
+//  stop when the round ends.
+// ============================================================================
 
-int main(int argc, char** argv) {
-    (void)argc; (void)argv;   // Week 1 stretch goal 3 gives these a purpose.
+#include "CollectorGame.h"
 
-    // TODO(week1): Initialize a SDL3 Window. Check if it IsValid(). Bail with a message
-    // and a non-zero exit code if it failed.
+#include <engine/Engine.h>
 
-    std::string wTitle = "My Epic Game";
+#include <cstdio>
+#include <cstring>
+#include <string>
 
-    eng::Window window(wTitle.c_str(), 1280, 720);
+namespace {
 
-    if (!window.IsValid())
-    {
-        std::print(stderr, "Could not make window\n");
+void PrintUsage() {
+    std::printf(
+        "sandbox - the game, running without the editor\n"
+        "\n"
+        "  (no options)            open the scene named in config/engine.json\n"
+        "  --game                  play the sample game, Collector\n"
+        "  --autoplay              the same game, played automatically\n"
+        "  --scene <path>          open a different scene, e.g. scenes/collector.json\n"
+        "  --config <path>         use a different settings file\n"
+        "  --frames <N>            run N frames then exit (useful for testing)\n"
+        "  --help                  this text\n");
+}
+
+// Just open a scene and run it. This is the mode that shows the orbiting
+// hierarchy from assets/scenes/orbit_test.json.
+int RunScene(const eng::Engine::Options& options, int frameLimit) {
+    if (!eng::Engine::Get().Init(options)) {
         return 1;
     }
 
-    bool running = true;
-    int color = 0;
-    int maxfps = 60;
-    bool capfps = true;
-    int fps = 0;
-    int lastTime = 0;
-
-    while (running) {
-        int currentTick = SDL_GetTicks();
-
-        SDL_Event event;
-        while (SDL_PollEvent(&event))
-        {
-            switch (event.type)
-            {
-                case SDL_EVENT_QUIT:
-                case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-                    running = false;
-                    break;
-                default:
-                    // Do nothing for other events
-                    break;
-            }
-        }
-
-        // Blue
-        //window.Clear(62, 54, 209);
-        // Random Color
-        //window.Clear(rand() % 255, rand() % 255, rand() % 255);
-        // Smooth Changing Color
-        color += 1;
-        window.Clear(color % 255, color/2 % 255, color/3 % 255);
-        window.Present();
-
-        if (capfps) // Cap FPS if cap is turned on
-        {
-            SDL_Delay(1000 / maxfps);
-        }
-
-        fps++; // Add to FPS
-        //int deltaTime = SDL_GetTicks() - currentTick; // Get Delta Time
-
-        if (currentTick > lastTime + 1000) // Check, reset & display FPS
-        {
-            lastTime = currentTick;
-            std::string fpsStr = wTitle + " | FPS: " + std::format("{}", fps);
-            window.SetTitle(fpsStr.c_str());
-            fps = 0;
+    if (frameLimit <= 0) {
+        // The ordinary case: run until the window is closed.
+        eng::Engine::Get().Run();
+    } else {
+        // A capped run, so an automated test can start the program and be sure
+        // it will finish.
+        for (int frame = 0; frame < frameLimit && eng::Engine::Get().BeginFrame();
+             ++frame) {
+            eng::Engine::Get().Simulate();
+            eng::Engine::Get().RenderFrame();
+            eng::Engine::Get().PresentFrame();
         }
     }
 
-    std::printf("Clean exit.\n");
+    eng::Engine::Get().Shutdown();
     return 0;
+}
+
+// Play the sample game.
+int RunGame(eng::Engine::Options options, bool autoplay, int frameLimit) {
+    // The game lives in its own scene file. Named here rather than in the
+    // engine, because which scene a game starts in is a decision belonging to
+    // the game.
+    if (options.sceneOverride.empty()) {
+        options.sceneOverride = "scenes/collector.json";
+    }
+
+    if (!eng::Engine::Get().Init(options)) {
+        return 1;
+    }
+
+    game::CollectorGame collector;
+    if (!collector.Init()) {
+        eng::Engine::Get().Shutdown();
+        return 1;
+    }
+    collector.SetAutopilot(autoplay);
+
+    // The loop is written out here rather than calling Engine::Run(), because
+    // this mode needs an extra reason to stop: the round finishing.
+    int frames = 0;
+    while (eng::Engine::Get().BeginFrame()) {
+        eng::Engine::Get().Simulate();
+        eng::Engine::Get().RenderFrame();
+        eng::Engine::Get().PresentFrame();
+        ++frames;
+
+        if (frameLimit > 0 && frames >= frameLimit) {
+            break;
+        }
+        if (autoplay && collector.IsFinished()) {
+            // Give the player a moment to read "YOU WIN" before the window
+            // closes, rather than vanishing the instant the last pickup goes.
+            static int lingerFrames = 0;
+            if (++lingerFrames > 120) {
+                break;
+            }
+        }
+    }
+
+    ENGINE_LOG_INFO(eng::Channels::kGame, "finished with {} collected after {} frames",
+                    collector.Collected(), frames);
+
+    collector.Shutdown();
+    eng::Engine::Get().Shutdown();
+    return 0;
+}
+
+} // namespace
+
+int main(int argc, char** argv) {
+    eng::Engine::Options options;
+
+    bool game       = false;
+    bool autoplay   = false;
+    int  frameLimit = 0;
+
+    // A small hand-written argument loop. It starts at 1 because argv[0] is
+    // the program's own name, not an option.
+    for (int i = 1; i < argc; ++i) {
+        const std::string arg = argv[i];
+
+        // A helper for the options that take a value after them, so the
+        // "is there actually another argument?" check is written once.
+        const auto next = [&](std::string& out) {
+            if (i + 1 < argc) {
+                out = argv[++i];
+                return true;
+            }
+            std::printf("%s needs a value after it\n", arg.c_str());
+            return false;
+        };
+
+        if (arg == "--help" || arg == "-h") {
+            PrintUsage();
+            return 0;
+        }
+        if (arg == "--game") {
+            game = true;
+        } else if (arg == "--autoplay") {
+            game     = true;
+            autoplay = true;
+        } else if (arg == "--scene") {
+            if (!next(options.sceneOverride)) { return 1; }
+        } else if (arg == "--config") {
+            if (!next(options.configPath)) { return 1; }
+        } else if (arg == "--frames") {
+            std::string value;
+            if (!next(value)) { return 1; }
+            frameLimit = std::atoi(value.c_str());
+        } else {
+            std::printf("unknown option '%s'\n\n", arg.c_str());
+            PrintUsage();
+            return 1;
+        }
+    }
+
+    return game ? RunGame(options, autoplay, frameLimit)
+                : RunScene(options, frameLimit);
 }
