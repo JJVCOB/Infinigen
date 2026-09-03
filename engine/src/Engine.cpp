@@ -22,7 +22,20 @@ Window& Engine::GetWindow() {
 // Builds the ordered list of subsystems. Registration order IS dependency
 // order, and shutdown runs it in reverse: Log, FileSystem, Window, Renderer,
 // EditorGui, Input, Resources, Gizmos, Messaging, Scripts, Scene, Collision.
-void Engine::RegisterBuiltinSubsystems(const Options& /*options*/) {
+void Engine::RegisterBuiltinSubsystems(const Options& options)
+{
+    m_subsystems.Register(std::make_unique<LambdaSubsystem>(
+        "Log", 
+        [this]
+        {
+            LogBuffer::SetCapacity(static_cast<std::size_t>(m_config.logBufferCapacity));
+            return Log::Init("", m_config.logThreshold);
+        },
+        []
+        { 
+            Log::Shutdown(); 
+        }
+    ));
 }
 
 // Starts everything: reads the settings file, brings the subsystems up in
@@ -83,7 +96,14 @@ void Engine::PresentFrame() {
 }
 
 // The standalone game's whole loop: begin, simulate, render, present, repeat.
-void Engine::Run() {
+void Engine::Run()
+{
+    while (BeginFrame())
+    {
+        Simulate();
+        RenderFrame();
+        PresentFrame();
+    }
 }
 
 } // namespace eng
