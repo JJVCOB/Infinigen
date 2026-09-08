@@ -46,4 +46,10 @@ std::size_t ScriptLibrary::ScriptCount() {
     return 0;
 }
 
+bool ScriptLibrary::Init(const BootConfig& config) {
+    return false;
+}
+
+void ScriptLibrary::Shutdown() {}
+
 } // namespace eng

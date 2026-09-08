@@ -104,4 +104,11 @@ int Gizmos::CircleSegments() {
     return 0;
 }
 
+bool Gizmos::Init(const BootConfig& config)
+{
+    return false;
+}
+
+void Gizmos::Shutdown() {}
+
 } // namespace eng
