@@ -159,10 +159,36 @@ private:
 
     void RegisterBuiltinSubsystems(const Options& options);
 
+    class RendererSubsystem : public Subsystem
+    {
+    public:
+        bool Init(const BootConfig& config) override;
+        void Shutdown() override;
+    };
+
+    class GuiSubsystem : public Subsystem {
+    public:
+        bool Init(const BootConfig& config) override;
+        void Shutdown() override;
+
+    private:
+        std::function<bool()> m_init;
+        std::function<void()> m_shutdown;
+    };
+
+    static Engine instance;
+
+    Log m_log;
+    FileSystem m_fileSystem;
+    Window m_window;
+    RendererSubsystem m_renderer;
+    //GuiSubsystem m_gui;
+
+
     SubsystemStack          m_subsystems;
     BootConfig              m_config;
     Json                    m_configDocument = Json::object();
-    std::unique_ptr<Window> m_window;
+    //std::unique_ptr<Window> m_window;
     std::unique_ptr<Scene>  m_scene;
 
     std::unique_ptr<CollisionSystem> m_collisionSystem;
