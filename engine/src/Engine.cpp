@@ -10,6 +10,7 @@ namespace eng {
 // Returns the one and only engine. Created the first time it is asked for, so
 // it is guaranteed to exist before anything tries to use it.
 Engine& Engine::Get() {
+    static Engine instance;
     return instance;
 }
 
@@ -20,13 +21,52 @@ Window& Engine::GetWindow() {
 
 bool Engine::RendererSubsystem::Init(const BootConfig&)
 {
-    return false;
+    Engine& engine = Engine::Get();
+    if (!Renderer::Init(engine.m_window))
+    {
+        return false;
+    }
+    engine.m_camera.SetViewportSize(Renderer::OutputSize());
+    return true;
 }
 
 void Engine::RendererSubsystem::Shutdown()
 {
     Renderer::Shutdown();
 }
+
+bool Engine::GuiSubsystem::Init(const BootConfig&) {
+    return m_init ? m_init() : true;
+}
+
+void Engine::GuiSubsystem::Use(std::function<bool()> init, std::function<void()> shutdown) {
+    m_init = std::move(init);
+    m_shutdown = std::move(shutdown);
+}
+
+void Engine::GuiSubsystem::Shutdown() {
+    if (m_shutdown) {
+        m_shutdown();
+    }
+}
+
+bool Engine::InputSubsystem::Init(const BootConfig&) {
+    return false;
+}
+
+void Engine::InputSubsystem::Shutdown() {}
+
+bool Engine::SceneSubsystem::Init(const BootConfig&) {
+    return false;
+}
+
+void Engine::SceneSubsystem::Shutdown() {}
+
+bool Engine::CollisionSubsystem::Init(const BootConfig&) {
+    return false;
+}
+
+void Engine::CollisionSubsystem::Shutdown() {}
 
 // Builds the ordered list of subsystems. Registration order IS dependency
 // order, and shutdown runs it in reverse: Log, FileSystem, Window, Renderer,

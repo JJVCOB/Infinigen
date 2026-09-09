@@ -7,6 +7,12 @@
 
 namespace eng {
 
+bool Window::Init(const BootConfig& config)
+{
+    return false;
+}
+void Window::Shutdown() {}
+
 // Opens an operating-system window of the given size, and the object that draws
 // into it. If anything fails the object is left INVALID rather than half-built,
 // and no exception is thrown - a display that will not open is a problem with
