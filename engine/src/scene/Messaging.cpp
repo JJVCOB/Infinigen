@@ -18,6 +18,12 @@ SubscriptionId MessageBus::SubscribeBroadcast(std::string_view /*type*/,
     return 0;
 }
 
+bool MessageBus::Init(const BootConfig& config)
+{
+    return false;
+}
+void MessageBus::Shutdown() {}
+
 // Stops listening. Safe to call from inside a handler, which is what a handler
 // that destroys its own entity ends up doing.
 void MessageBus::Unsubscribe(SubscriptionId /*id*/) {

@@ -195,14 +195,13 @@ private:
         void Shutdown() override;
     };
 
-    //static Engine instance;
-
     Log m_log;
     FileSystem m_fileSystem;
     Window m_window;
     RendererSubsystem m_renderer;
     GuiSubsystem m_gui;
     InputSubsystem m_input;
+
     ResourceManager m_resources;
     Gizmos m_gizmos;
     MessageBus m_messaging;
@@ -210,25 +209,25 @@ private:
     SceneSubsystem m_sceneSubsystem;
     CollisionSubsystem m_collisionSubsystem;
 
-    SubsystemStack          m_subsystems;
-    BootConfig              m_config;
-    Json                    m_configDocument = Json::object();
+    SubsystemStack m_subsystems;
+    BootConfig m_config;
+    Json m_configDocument = Json::object();
     //std::unique_ptr<Window> m_window;
-    std::unique_ptr<Scene>  m_scene;
+    std::unique_ptr<Scene> m_scene;
 
     std::unique_ptr<CollisionSystem> m_collisionSystem;
-    std::unique_ptr<SpinSystem>      m_spinSystem;
-    std::unique_ptr<ScriptSystem>    m_scriptSystem;
+    std::unique_ptr<SpinSystem> m_spinSystem;
+    std::unique_ptr<ScriptSystem> m_scriptSystem;
 
     EventPump m_events;
-    Camera    m_camera;
+    Camera m_camera;
     GameClock m_clock;
 
     double m_lastFrameTicks = 0.0;
-    int    m_stepsThisFrame = 0;
-    bool   m_initialised    = false;
-    bool   m_quitRequested  = false;
-    bool   m_inPlayMode     = false;
+    int m_stepsThisFrame = 0;
+    bool m_initialised    = false;
+    bool m_quitRequested  = false;
+    bool m_inPlayMode     = false;
 
     // The scene as it was when Play was pressed, so Stop can put it back.
     std::string m_playModeSnapshot;
