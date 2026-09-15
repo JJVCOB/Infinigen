@@ -1,29 +1,5 @@
 #pragma once
 
-// ============================================================================
-//  Subsystem.h - starting the engine's pieces up in a written-down order, and
-//  shutting them down in exactly the reverse.
-//
-//  WHY THIS EXISTS
-//  The engine is made of parts that depend on one another. The renderer needs
-//  a window. The texture loader needs a renderer. Everything needs the log.
-//  Start them in the wrong order and the failure is not obvious - it usually
-//  works, and then one day it does not, on somebody else's machine.
-//
-//  C++ makes it worse: global objects in different .cpp files are created in
-//  an order the standard does not define. A global log in one file and a
-//  global renderer in another have no fixed relationship. It works, it keeps
-//  working, and then somebody reorders two filenames in the build script and
-//  it stops.
-//
-//  The fix is not clever: do not use global objects for these things. START
-//  THEM EXPLICITLY, IN AN ORDER THAT IS WRITTEN DOWN. That is this file, and
-//  the order itself is in Engine.cpp.
-//
-//  REGISTRATION ORDER IS DEPENDENCY ORDER. Each subsystem may assume
-//  everything registered before it is already running.
-// ============================================================================
-
 #include <string>
 #include <vector>
 
@@ -31,41 +7,18 @@ namespace eng {
 
 struct BootConfig;
 
-// One startable, stoppable piece of the engine.
 class Subsystem {
 public:
     virtual ~Subsystem() = default;
-
-    // Returns false when it cannot start.
-    //
-    // It does NOT throw and it does not crash the program. A subsystem failing
-    // to start is usually a problem with the machine - no display, a missing
-    // file, no sound device - and the engine has to be able to respond to that
-    // and exit tidily rather than simply dying.
     virtual bool Init(const BootConfig& config) = 0;
-
     virtual void Shutdown() = 0;
 };
 
-
-// The list of subsystems, in the order they start.
 class SubsystemStack {
 public:
     void Add(std::string name, Subsystem& subsystem);
-
-    // Starts everything in registration order, writing each one to the log.
-    //
-    // If one of them fails, the ones that already started are shut down in
-    // REVERSE order, the failing one is NOT shut down (it never started, and
-    // shutting down something that never started is how a tidy-up crashes),
-    // the ones after it are never touched, and this returns false so the
-    // program can print a message and exit.
     bool InitAll(const BootConfig& config);
-
-    // Shuts everything down in the exact reverse of the order it started.
-    // Safe to call after a failed InitAll - that already unwound itself.
     void ShutdownAll();
-
     std::size_t Count() const { return m_entries.size(); }
 
 private:
@@ -74,7 +27,6 @@ private:
         std::string name;
         Subsystem* system = nullptr;
     };
-
     std::vector<Entry> m_entries;
     std::size_t m_startedCount = 0;
 };

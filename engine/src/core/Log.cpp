@@ -42,8 +42,7 @@ const char* ColorFor(LogLevel level) {
 
 // Turns a level into the word the Console and the log file show.
 const char* ToString(LogLevel level) {
-    switch (level)
-    {
+    switch (level) {
         using enum LogLevel;
         case Info: return "Info";
         case Warning: return "Warning";
@@ -55,6 +54,25 @@ const char* ToString(LogLevel level) {
 // Turns a word from the settings file back into a level. Returns false when the
 // text is not a level name, so the caller can report it rather than guess.
 bool ParseLogLevel(std::string_view text, LogLevel& out) {
+    std::string lowered;
+    lowered.reserve(text.size());
+    for (char c : text) {
+        lowered.push_back(std::tolower(c));
+        //const bool upper = (c >= 'A' && c <= 'Z');
+        //lowered.push_back(upper ? static_cast<char>(c + ('a' - 'A')) : c);
+    }
+    if (lowered == "info") {
+        out = LogLevel::Info;
+        return true;
+    }
+    if (lowered == "warning" || lowered == "warn") {
+        out = LogLevel::Warning;
+        return true;
+    }
+    if (lowered == "error") {
+        out = LogLevel::Error;
+        return true;
+    }
     return false;
 }
 
@@ -100,27 +118,10 @@ void Log::Shutdown()
     g_initialized = false;
 }
 
-// Has the log been opened yet? Anything that might run before start-up asks
-// this first.
-bool Log::IsInitialised()
-{
-    return g_initialized;
-}
-
-// Sets the lowest level that gets recorded. Anything below it is dropped.
-void Log::SetThreshold(LogLevel /*level*/) {
-}
-
-// The level currently being filtered at.
-LogLevel Log::GetThreshold() {
-    return LogLevel::Info;
-}
-
-// Would a message at this level be recorded? The logging macros ask this BEFORE
-// formatting, so a filtered-out message never pays the cost of building its text.
-bool Log::ShouldLog(LogLevel /*level*/) {
-    return false;
-}
+bool Log::IsInitialised() {return g_initialized;}
+void Log::SetThreshold(LogLevel level) {g_threshold = level;}
+LogLevel Log::GetThreshold() {return g_threshold;}
+bool Log::ShouldLog(LogLevel level) {return level >= g_threshold;}
 
 // Records one finished message to all three destinations at once.
 void Log::Write(std::string_view channel, LogLevel level, std::string_view message) {
