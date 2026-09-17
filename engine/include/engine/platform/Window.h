@@ -2,7 +2,6 @@
 
 #include <engine/core/Subsystem.h>
 #include <engine/platform/SdlHandles.h>
-
 #include <string>
 
 namespace eng {
@@ -18,8 +17,8 @@ public:
     Window& operator=(const Window&) = delete;
 
     bool IsValid() const;
-    int  Width() const;
-    int  Height() const;
+    int Width() const;
+    int Height() const;
     void SetTitle(const char* title);
     void Clear(unsigned char r, unsigned char g, unsigned char b);
     void Present();

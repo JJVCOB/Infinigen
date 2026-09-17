@@ -1,7 +1,6 @@
 #include <engine/platform/Window.h>
 #include <engine/core/Config.h>
 #include <engine/core/Log.h>
-
 #include <SDL3/SDL.h>
 
 namespace eng {
@@ -63,25 +62,35 @@ bool Window::IsValid() const {
 }
 
 int Window::Width() const {
-    return 0;
+    int w, h = 0;
+    if (m_window != nullptr) {SDL_GetWindowSize(m_window.get(), &w, &h);}
+    return w;
 }
 
 int Window::Height() const {
-    return 0;
+    int w, h = 0;
+    if (m_window != nullptr) {SDL_GetWindowSize(m_window.get(), &w, &h);}
+    return h;
 }
 
-void Window::SetTitle(const char* title) {}
-
-void Window::Clear(unsigned char r, unsigned char g, unsigned char b) {}
-
-void Window::Present() {}
-
-void* Window::NativeWindowHandle() const {
-    return nullptr;
+void Window::SetTitle(const char* title) {
+    if (m_window == nullptr || title == nullptr) {return;}
+    m_title = title;
+    SDL_SetWindowTitle(m_window.get(), m_title.c_str());
 }
 
-void* Window::NativeRendererHandle() const {
-    return nullptr;
+void Window::Clear(unsigned char r, unsigned char g, unsigned char b) {
+    if (m_renderer == nullptr) {return;}
+    SDL_SetRenderDrawColor(m_renderer.get(), r, g, b, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(m_renderer.get());
 }
+
+void Window::Present() {
+    if (m_renderer == nullptr) {return;}
+    SDL_RenderPresent(m_renderer.get());
+}
+
+void* Window::NativeWindowHandle() const {return m_window.get();}
+void* Window::NativeRendererHandle() const {return m_renderer.get();}
 
 } // namespace eng

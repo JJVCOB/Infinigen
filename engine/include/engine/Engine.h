@@ -32,7 +32,6 @@
 #include <engine/scene/SpinComponent.h>
 #include <engine/scene/SystemOrder.h>
 #include <engine/tools/GuiHooks.h>
-
 #include <functional>
 #include <memory>
 #include <string>
@@ -51,7 +50,7 @@ public:
     static Engine& Get();
     bool Init(const Options& options);
     void Shutdown();
-    bool BeginFrame();        // returns false when it is time to stop
+    bool BeginFrame(); // returns false when it is time to stop
     void Simulate();
     void RenderFrame();
     void PresentFrame();
@@ -60,25 +59,21 @@ public:
     void RequestQuit() { m_quitRequested = true; }
     bool QuitRequested() const { return m_quitRequested; }
     int StepsThisFrame() const { return m_stepsThisFrame; }
-
-    Window&           GetWindow();
-    const EventPump&  Events() const { return m_events; }
-    Camera&           GetCamera()    { return m_camera; }
-    GameClock&        Clock()        { return m_clock; }
-    Scene&            GetScene()     { return *m_scene; }
+    Window& GetWindow();
+    const EventPump& Events() const { return m_events; }
+    Camera& GetCamera() { return m_camera; }
+    GameClock& Clock() { return m_clock; }
+    Scene& GetScene() { return *m_scene; }
     const BootConfig& Config() const { return m_config; }
-
     bool LoadScene(std::string_view virtualPath, std::string& outError);
     bool SaveScene(std::string_view virtualPath, std::string& outError);
     bool EnterPlayMode(std::string& outError);
     void ExitPlayMode();
     bool IsInPlayMode() const { return m_inPlayMode; }
-
     bool IsInitialised() const { return m_initialised; }
 
 private:
     Engine() = default;
-
     void RegisterBuiltinSubsystems(const Options& options);
 
     class RendererSubsystem : public Subsystem
@@ -134,7 +129,6 @@ private:
     SubsystemStack m_subsystems;
     BootConfig m_config;
     Json m_configDocument = Json::object();
-    //std::unique_ptr<Window> m_window;
     std::unique_ptr<Scene> m_scene;
 
     std::unique_ptr<CollisionSystem> m_collisionSystem;
@@ -147,9 +141,9 @@ private:
 
     double m_lastFrameTicks = 0.0;
     int m_stepsThisFrame = 0;
-    bool m_initialised    = false;
-    bool m_quitRequested  = false;
-    bool m_inPlayMode     = false;
+    bool m_initialised = false;
+    bool m_quitRequested = false;
+    bool m_inPlayMode = false;
 
     std::string m_playModeSnapshot;
 };

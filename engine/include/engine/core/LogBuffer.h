@@ -1,7 +1,6 @@
 #pragma once
 
 #include <engine/core/Log.h>
-
 #include <string>
 #include <vector>
 

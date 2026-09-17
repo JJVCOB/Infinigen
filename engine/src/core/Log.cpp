@@ -1,12 +1,6 @@
-// =============================================================================
-//  Log.cpp - a skeleton. Every function is here with the right signature and an
-//  empty body. Log.h is the specification; read it before filling one in.
-// =============================================================================
-
 #include <engine/core/Config.h>
 #include <engine/core/Log.h>
 #include <engine/core/LogBuffer.h>
-
 #include <chrono>
 #include <cstdio>
 #include <filesystem>
@@ -40,7 +34,6 @@ const char* ColorFor(LogLevel level) {
     return "\x1b[0m";
 }
 
-// Turns a level into the word the Console and the log file show.
 const char* ToString(LogLevel level) {
     switch (level) {
         using enum LogLevel;
@@ -51,8 +44,6 @@ const char* ToString(LogLevel level) {
     return "?";
 }
 
-// Turns a word from the settings file back into a level. Returns false when the
-// text is not a level name, so the caller can report it rather than guess.
 bool ParseLogLevel(std::string_view text, LogLevel& out) {
     std::string lowered;
     lowered.reserve(text.size());
@@ -76,8 +67,6 @@ bool ParseLogLevel(std::string_view text, LogLevel& out) {
     return false;
 }
 
-// Opens the log: the terminal, the log file, and the in-memory list the editor's
-// Console window reads. First subsystem up, because everything else writes to it.
 bool Log::Init(const BootConfig& config) {
     LogBuffer::SetCapacity(static_cast<std::size_t>(config.logBufferCapacity));
 
@@ -104,10 +93,7 @@ bool Log::Init(const BootConfig& config) {
     return g_initialized;
 }
 
-// Closes the log file. Last subsystem down, so that every other subsystem's
-// shutdown message still has somewhere to go.
-void Log::Shutdown()
-{
+void Log::Shutdown() {
     Write(Channels::kCore, LogLevel::Info, "Log shutting down");
 
     if (g_file.is_open()) {
@@ -123,7 +109,6 @@ void Log::SetThreshold(LogLevel level) {g_threshold = level;}
 LogLevel Log::GetThreshold() {return g_threshold;}
 bool Log::ShouldLog(LogLevel level) {return level >= g_threshold;}
 
-// Records one finished message to all three destinations at once.
 void Log::Write(std::string_view channel, LogLevel level, std::string_view message) {
     if (!ShouldLog(level)) {
         return;
@@ -164,8 +149,6 @@ void Log::Write(std::string_view channel, LogLevel level, std::string_view messa
     }
 }
 
-// Pushes anything buffered out to the log file now, so a crash straight
-// afterwards still leaves a readable record.
 void Log::Flush() {
     std::fflush(stdout);
     if (g_file.is_open()) {

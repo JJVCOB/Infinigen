@@ -1,7 +1,6 @@
 #include <engine/core/Log.h>
 #include <engine/fs/FileSystem.h>
 #include <SDL3/sdl.h>
-
 #include <algorithm>
 #include <cstdlib>
 #include <filesystem>
