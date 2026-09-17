@@ -34,7 +34,7 @@ bool Window::Init(const BootConfig& config) {
         ENGINE_LOG_WARN(Channels::kPlatform, "VSync is not available: {}", SDL_GetError());
     }
 
-    ENGINE_LOG_INFO(Channels::kPlatform, "Window created: {}x{} \"{}\" (drawing with {}}", width, height, m_title, SDL_GetRendererName(m_renderer.get()));
+    ENGINE_LOG_INFO(Channels::kPlatform, "Window created: {}x{} \"{}\" (drawing with {})", width, height, m_title, SDL_GetRendererName(m_renderer.get()));
     return true;
 }
 
