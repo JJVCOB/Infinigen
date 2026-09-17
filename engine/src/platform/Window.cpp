@@ -1,64 +1,85 @@
-// =============================================================================
-//  Window.cpp - a skeleton. Every function is here with the right signature and
-//  an empty body. Window.h is the specification; read it before filling one in.
-// =============================================================================
-
 #include <engine/platform/Window.h>
+#include <engine/core/Config.h>
+#include <engine/core/Log.h>
+
+#include <SDL3/SDL.h>
 
 namespace eng {
 
-bool Window::Init(const BootConfig& config)
-{
-    return false;
-}
-void Window::Shutdown() {}
+bool Window::Init(const BootConfig& config) {
+    m_title = config.windowTitle.empty() ? "Infinigen" : config.windowTitle;
+    const int width = config.windowWidth;
+    const int height = config.windowHeight;
+    
+    if (!SDL_InitSubSystem(SDL_INIT_VIDEO)) {
+        ENGINE_LOG_ERROR(Channels::kPlatform, "Could not start SDL video: {}", SDL_GetError());
+        return false;
+    }
 
-// Opens an operating-system window of the given size, and the object that draws
-// into it. If anything fails the object is left INVALID rather than half-built,
-// and no exception is thrown - a display that will not open is a problem with
-// the machine, not a bug, and the caller should be able to exit tidily.
-Window::Window(const char* /*title*/, int /*width*/, int /*height*/) {
+    m_videoInitialised = true;
+    SDL_Window* rawWindow = nullptr;
+    SDL_Renderer* rawRenderer = nullptr;
+
+    if (!SDL_CreateWindowAndRenderer(m_title.c_str(), width, height, SDL_WINDOW_RESIZABLE, &rawWindow, &rawRenderer)) {
+        ENGINE_LOG_ERROR(Channels::kPlatform, "Could not create the SDL window: {}", SDL_GetError());
+        m_window.reset(rawWindow);
+        m_renderer.reset(rawRenderer);
+        return false;
+    }
+
+    m_window.reset(rawWindow);
+    m_renderer.reset(rawRenderer);
+
+    if (!SDL_SetRenderVSync(m_renderer.get(), 1)) {
+        ENGINE_LOG_WARN(Channels::kPlatform, "VSync is not available: {}", SDL_GetError());
+    }
+
+    ENGINE_LOG_INFO(Channels::kPlatform, "Window created: {}x{} \"{}\" (drawing with {}}", width, height, m_title, SDL_GetRendererName(m_renderer.get()));
+    return true;
 }
 
-// Closes the window. The renderer has to go first, which is the order the
-// members are declared in - see Window.h.
+void Window::Shutdown() {
+    if (m_window == nullptr && m_renderer == nullptr && !m_videoInitialised) {
+        return;
+    }
+
+    m_renderer.reset();
+    m_window.reset();
+
+    if (m_videoInitialised) {
+        SDL_QuitSubSystem(SDL_INIT_VIDEO);
+        m_videoInitialised = false;
+    }
+
+    ENGINE_LOG_INFO(Channels::kPlatform, "Window closed");
+}
+
 Window::~Window() {
+    Shutdown();
 }
 
-// Did the window actually open? Start-up stops here if it did not.
 bool Window::IsValid() const {
-    return false;
+    return m_window != nullptr && m_renderer != nullptr;
 }
 
-// How wide the window is, in pixels.
 int Window::Width() const {
     return 0;
 }
 
-// How tall the window is, in pixels.
 int Window::Height() const {
     return 0;
 }
 
-// Changes the text in the window's title bar.
-void Window::SetTitle(const char* /*title*/) {
-}
+void Window::SetTitle(const char* title) {}
 
-// Fills the whole window with one colour, wiping last frame's picture.
-void Window::Clear(unsigned char /*r*/, unsigned char /*g*/, unsigned char /*b*/) {
-}
+void Window::Clear(unsigned char r, unsigned char g, unsigned char b) {}
 
-// Shows whatever has been drawn since the last Clear.
-void Window::Present() {
-}
+void Window::Present() {}
 
-// The underlying SDL window, as a plain pointer. Only the editor needs this, to
-// attach its interface - which is why it is handed out without naming SDL.
 void* Window::NativeWindowHandle() const {
     return nullptr;
 }
 
-// The underlying SDL renderer, handed out for the same reason.
 void* Window::NativeRendererHandle() const {
     return nullptr;
 }

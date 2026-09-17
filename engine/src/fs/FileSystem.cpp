@@ -27,7 +27,7 @@ bool FileSystem::Init(const BootConfig& config) {
         const fs::path candidate = fs::absolute(fs::path(overridePath), ec);
         if (LooksLikeRoot(candidate)) {
             g_root = candidate.string();
-            ENGINE_LOG_INFO(Channels::kFileSys, "asset folder taken from ENGINE_ASSET_ROOT: '{}'", g_root);
+            ENGINE_LOG_INFO(Channels::kFileSys, "Asset folder taken from ENGINE_ASSET_ROOT: '{}'", g_root);
             return true;
         }
         ENGINE_LOG_WARN(Channels::kFileSys, "ENGINE_ASSET_ROOT is set to '{}' but there is no 'assets' folder there; searching instead", overridePath);
@@ -39,7 +39,7 @@ bool FileSystem::Init(const BootConfig& config) {
     } else {
         std::error_code ec;
         start = fs::current_path(ec);
-        ENGINE_LOG_WARN(Channels::kFileSys, "could not find the program's own folder; falling back to the current directory, which is not reliable");
+        ENGINE_LOG_WARN(Channels::kFileSys, "Could not find the program's own folder; falling back to the current directory, which is not reliable");
     }
 
     std::error_code ec;
@@ -47,7 +47,7 @@ bool FileSystem::Init(const BootConfig& config) {
     for (int depth = 0; depth < 12; ++depth) {
         if (LooksLikeRoot(current)) {
             g_root = current.string();
-            ENGINE_LOG_INFO(Channels::kFileSys, "assets found in {}", g_root);
+            ENGINE_LOG_INFO(Channels::kFileSys, "Assets found in {}", g_root);
             return true;
         }
         if (!current.has_parent_path() || current.parent_path() == current) {
@@ -56,14 +56,14 @@ bool FileSystem::Init(const BootConfig& config) {
         current = current.parent_path();
     }
 
-    ENGINE_LOG_ERROR(Channels::kFileSys, "could not find an 'assets' folder above '{}'. Can not load. ", start.string());
+    ENGINE_LOG_ERROR(Channels::kFileSys, "Could not find an 'assets' folder above '{}'. Can not load. ", start.string());
     g_root = start.string();
     return false;
 }
 
 void FileSystem::Shutdown() {
     g_root.clear();
-    ENGINE_LOG_INFO(Channels::kFileSys, "file system has shut down.");
+    ENGINE_LOG_INFO(Channels::kFileSys, "File system has shut down.");
 }
 
 const std::string& FileSystem::AssetRoot() {return g_root;}
@@ -168,7 +168,7 @@ bool FileSystem::CreateDirectory(std::string_view virtualDirectory, std::string&
     fs::create_directories(real, ec);
 
     if (ec) {
-        outError = "cannot create '" + std::string(virtualDirectory) + "': " + ec.message();
+        outError = "Could not create '" + std::string(virtualDirectory) + "': " + ec.message();
         return false;
     }
     outError.clear();
@@ -177,15 +177,70 @@ bool FileSystem::CreateDirectory(std::string_view virtualDirectory, std::string&
 }
 
 bool FileSystem::ReadTextFile(std::string_view virtualPath, std::string& outText, std::string& outError) {
-    return false;
+    const std::string real = Resolve(virtualPath);
+    std::ifstream file(real);
+    if (!file) {
+        outError = "Could not open '" + std::string(virtualPath) + "' (searched in '" + real + "')";
+        return false;
+    }
+
+    std::ostringstream contents;
+    contents << file.rdbuf();
+    outText = contents.str();
+
+    outError.clear();
+    return true;
 }
 
 bool FileSystem::ReadFile(std::string_view virtualPath, std::vector<unsigned char>& outBytes, std::string& outError) {
-    return false;
+    const std::string real = Resolve(virtualPath);
+    std::ifstream file(real, std::ios::binary | std::ios::ate);
+
+    if (!file) {
+        outError = "Could not open '" + std::string(virtualPath) + "' (searched in '" + real + "')";
+        return false;
+    }
+
+    const std::streamsize size = file.tellg();
+
+    if (size < 0) {
+        outError = "Could not measure file size of: '" + real + "'";
+        return false;
+    }
+
+    file.seekg(0, std::ios::beg);
+    outBytes.resize(static_cast<std::size_t>(size));
+    
+    if (size > 0 && !file.read(reinterpret_cast<char*>(outBytes.data()), size)) {
+        outError = "Read failed in: '" + real + "'";
+        outBytes.clear();
+        return false;
+    }
+    
+    outError.clear();
+    return true;
 }
 
 bool FileSystem::WriteTextFile(std::string_view virtualPath, std::string_view text, std::string& outError) {
-    return false;
+    const std::string real = Resolve(virtualPath);
+    std::error_code ec;
+    fs::create_directories(fs::path(real).parent_path(), ec);
+    std::ofstream file(real, std::ios::trunc);
+
+    if (!file) {
+        outError = "Could not open '" + real + "' for writing";
+        return false;
+    }
+
+    file.write(text.data(), static_cast<std::streamsize>(text.size()));
+
+    if (!file) {
+        outError = "Writing to '" + real + "' failed";
+        return false;
+    }
+
+    outError.clear();
+    return true;
 }
 
 } // namespace eng
