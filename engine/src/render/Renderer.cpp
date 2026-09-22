@@ -128,9 +128,32 @@ float Renderer::TextLineHeight() { return static_cast<float>(SDL_DEBUG_TEXT_FONT
 float Renderer::TextCharWidth() { return static_cast<float>(SDL_DEBUG_TEXT_FONT_CHARACTER_SIZE) * g_textScale; }
 
 void Renderer::DrawText(Vec2 topLeft, const char* text, Color color) {
+    if (g_renderer == nullptr || text == nullptr) { return; }
+    ApplyColor(color);
+
+    if (g_textScale != 1.0f) {
+        float sx, sy = 1.0f;
+        SDL_GetRenderScale(g_renderer, &sx, &sy);
+        SDL_SetRenderScale(g_renderer, g_textScale, g_textScale);
+        SDL_RenderDebugText(g_renderer, topLeft.x / g_textScale, topLeft.y / g_textScale, text);
+        SDL_SetRenderScale(g_renderer, sx, sy);
+    } else {
+        SDL_RenderDebugText(g_renderer, topLeft.x, topLeft.y, text);
+    }
 }
 
-void Renderer::DrawSprite(const TextureRef& texture, Vec2 centre, Vec2 size, float rotationDegrees, Color tint) {
+void Renderer::DrawSprite(const TextureRef& texture, Vec2 center, Vec2 size, float rotationDegrees, Color tint) {
+    if (g_renderer == nullptr) { return; }
+    if (!texture || texture->native == nullptr) { return; }
+
+    auto* sdlTexture = static_cast<SDL_Texture*>(texture->native);
+    SDL_SetTextureColorMod(sdlTexture, tint.r, tint.g, tint.b);
+    SDL_SetTextureAlphaMod(sdlTexture, tint.a);
+    SDL_SetTextureBlendMode(sdlTexture, SDL_BLENDMODE_BLEND);
+
+    SDL_FRect dst{center.x - size.x * 0.5f, center.y - size.y * 0.5f, size.x, size.y};
+    SDL_FPoint pivot{size.x * 0.5f, size.y * 0.5f};
+    SDL_RenderTextureRotated(g_renderer, sdlTexture, nullptr, &dst, static_cast<double>(rotationDegrees), &pivot, SDL_FLIP_NONE);
 }
 
 } // namespace eng

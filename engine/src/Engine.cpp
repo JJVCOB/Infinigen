@@ -160,11 +160,15 @@ bool Engine::BeginFrame() {
 
 void Engine::Simulate() {}
 
-void Engine::RenderWorld(Camera& camera, bool includeGizmos) {}
+void Engine::RenderWorld(Camera& camera, bool includeGizmos) {
 
-void Engine::RenderFrame() {}
+}
 
-void Engine::PresentFrame() {}
+void Engine::RenderFrame() {
+    
+}
+
+void Engine::PresentFrame() { Renderer::Present(); }
 
 void Engine::Run()
 {
