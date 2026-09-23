@@ -33,7 +33,7 @@ class Log : public Subsystem {
 public:
     bool Init(const BootConfig& config) override;
     void Shutdown() override;
-    static bool IsInitialised();
+    static bool Isinitialized();
     static void Write(std::string_view channel, LogLevel level, std::string_view message);
     static void SetThreshold(LogLevel level);
     static LogLevel GetThreshold();

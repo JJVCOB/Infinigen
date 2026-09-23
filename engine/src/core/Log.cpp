@@ -104,7 +104,7 @@ void Log::Shutdown() {
     g_initialized = false;
 }
 
-bool Log::IsInitialised() {return g_initialized;}
+bool Log::Isinitialized() {return g_initialized;}
 void Log::SetThreshold(LogLevel level) {g_threshold = level;}
 LogLevel Log::GetThreshold() {return g_threshold;}
 bool Log::ShouldLog(LogLevel level) {return level >= g_threshold;}
