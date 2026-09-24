@@ -19,6 +19,8 @@ const Json& Section(const Json& document, const char* name) {
 } // namespace
 
 bool LoadBootConfig(std::string_view virtualPath, BootConfig& outConfig, Json& outDocument, std::string& outError) {
+    outDocument = Json::object();
+    
     std::string text;
     std::string readError;
 
@@ -41,11 +43,11 @@ bool LoadBootConfig(std::string_view virtualPath, BootConfig& outConfig, Json& o
     const Json& window = Section(document, "window");
     outConfig.windowWidth = ReadInt(window, "width", outConfig.windowWidth, "window");
     outConfig.windowHeight = ReadInt(window, "height", outConfig.windowHeight, "window");
-    
+    outConfig.windowTitle = ReadString(window, "title", outConfig.windowTitle, "window");
 
     // Logging
     const Json& logging = Section(document, "logging");
-    outConfig.logFile = ReadString(logging, "file", outConfig.logFile, logging);
+    outConfig.logFile = ReadString(logging, "file", outConfig.logFile, "logging");
     const std::string thresholdText = ReadString(logging, "threshold", ToString(outConfig.logThreshold), "logging");
 
     if (!ParseLogLevel(thresholdText, outConfig.logThreshold)) {
@@ -60,7 +62,8 @@ bool LoadBootConfig(std::string_view virtualPath, BootConfig& outConfig, Json& o
     outConfig.maxStepsPerFrame = ReadInt(tunables, "maxStepsPerFrame", outConfig.maxStepsPerFrame, "tunables");
 
     // Startup
-    outConfig.startupScene = ReadString(Section(document, "startup"), "scene", outConfig.startupScene, "startup");
+    const Json& startup = Section(document, "startup");
+    outConfig.startupScene = ReadString(startup, "scene", outConfig.startupScene, "startup");
 
     outDocument = std::move(document);
     outError.clear();

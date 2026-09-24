@@ -8,6 +8,7 @@
 namespace eng {
 
 using Json = nlohmann::json;
+
 Json ParseJson(std::string_view text, std::string& outError);
 int ReadInt(const Json& object, std::string_view key, int fallback, std::string_view where = "");
 float ReadFloat(const Json& object, std::string_view key, float fallback, std::string_view where = "");

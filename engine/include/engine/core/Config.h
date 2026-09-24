@@ -8,22 +8,22 @@
 namespace eng {
 
 struct BootConfig {
-    // window
-    int windowWidth  = 1280;
+    // Window
+    int windowWidth = 1280;
     int windowHeight = 720;
     std::string windowTitle = "Infinigen";
 
-    // logging
+    // Logging
     LogLevel logThreshold = LogLevel::Info;
     std::string logFile = "logs/engine.log";
 
-    // tunables
+    // Tunables
     int logBufferCapacity = 4096; // messages kept for the Console
-    int gizmoCircleSegments  = 24; // how round a drawn circle looks
+    int gizmoCircleSegments = 24; // how round a drawn circle looks
     float fixedTimestepSeconds = 1.0f / 60.0f;
     int maxStepsPerFrame = 5;
 
-    // startup
+    // Startup
     std::string startupScene = "scenes/orbit_test.json";
 };
 
