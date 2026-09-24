@@ -2,12 +2,8 @@
 
 namespace eng {
 
-void SetGuiHooks(const GuiHooks& hooks) {
-}
-
-const GuiHooks& GetGuiHooks() {
-    static const GuiHooks none{};
-    return none;
-}
+namespace { GuiHooks g_hooks; }
+void SetGuiHooks(const GuiHooks& hooks) { g_hooks = hooks; }
+const GuiHooks& GetGuiHooks() { return g_hooks; }
 
 } // namespace eng

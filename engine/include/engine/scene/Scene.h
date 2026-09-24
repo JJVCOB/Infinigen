@@ -34,7 +34,7 @@ public:
     bool IsValid(EntityId id) const;
     EntityId Find(std::string_view name) const;
     void ForEach(const std::function<void(Entity&)>& fn);
-    std::size_t EntityCount() const { return m_liveCount; }
+    std::size_t EntityCount() const { return 0; } // return m_liveCount;
     EntityId CreateEntityFromJson(const Json& node, std::string_view nameOverride, std::string& outError);
     Vec2  InitialCameraPosition() const { return m_cameraPosition; }
     float InitialCameraZoom() const { return m_cameraZoom; }

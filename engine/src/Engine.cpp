@@ -178,8 +178,12 @@ void Engine::Shutdown() {
         m_subsystems.ShutdownAll();
         return;
     }
+
     ENGINE_LOG_INFO(Channels::kCore, "Shutting down engine.");
     SystemScheduler::Clear();
+    m_subsystems.ShutdownAll();
+    m_initialized = false;
+    SDL_Quit();
 }
 
 bool Engine::LoadScene(std::string_view virtualPath, std::string& outError) {
@@ -197,14 +201,28 @@ bool Engine::EnterPlayMode(std::string& outError) {
 void Engine::ExitPlayMode() {}
 
 bool Engine::BeginFrame() {
-    return false;
+    const double now = static_cast<double>(SDL_GetPerformanceCounter());
+    const double frequency = static_cast<double>(SDL_GetPerformanceFrequency());
+    double delta = (now - m_lastFrameTicks) / frequency;
+    m_lastFrameTicks = now;
+    delta = std::min(delta, 0.25); // do not allow the spiral of death OR ELSE.
+    ResourceManager::PruneCache();
+    m_events.Poll();
+    InputMap::Update(m_events);
+
+    if (m_events.QuitRequested()) {
+        m_quitRequested = true;
+    }
+
+    m_camera.SetViewportSize(Renderer::OutputSize());
+    m_stepsThisFrame = m_clock.BeginFrame(delta);
+
+    return !m_quitRequested;
 }
 
 void Engine::Simulate() {}
 
-void Engine::RenderWorld(Camera& camera, bool includeGizmos) {
-
-}
+void Engine::RenderWorld(Camera& camera, bool includeGizmos) {}
 
 void Engine::RenderFrame() {
     

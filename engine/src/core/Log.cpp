@@ -118,7 +118,7 @@ void Log::Write(std::string_view channel, LogLevel level, std::string_view messa
     record.timeSeconds = ElapsedSeconds();
     record.level = level;
     record.channel.assign(channel);
-    record.channel.assign(message);
+    record.message.assign(message);
 
     const std::string line = std::format("[{:9.3f}] [{:>7}] [{:<12}] | {}", record.timeSeconds, ToString(level), record.channel, record.message);
 

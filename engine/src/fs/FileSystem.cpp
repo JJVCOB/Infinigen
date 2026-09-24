@@ -113,7 +113,6 @@ bool FileSystem::ListFiles(std::string_view virtualDirectory, std::string_view e
 
 bool FileSystem::ListDirectory(std::string_view virtualDirectory, std::vector<DirEntry>& out) {
     out.clear();
-
     const std::string real = Resolve(virtualDirectory);
     std::error_code ec;
 
