@@ -187,15 +187,15 @@ void Engine::Shutdown() {
 }
 
 bool Engine::LoadScene(std::string_view virtualPath, std::string& outError) {
-    return false;
+    return true;
 }
 
 bool Engine::SaveScene(std::string_view virtualPath, std::string& outError) {
-    return false;
+    return true;
 }
 
 bool Engine::EnterPlayMode(std::string& outError) {
-    return false;
+    return true;
 }
 
 void Engine::ExitPlayMode() {}

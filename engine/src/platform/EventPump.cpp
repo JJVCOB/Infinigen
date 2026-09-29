@@ -153,10 +153,20 @@ const char* EventPump::KeyName(int code) {
 }
 
 int EventPump::KeyCodeFromName(const char* name) {
-    return -1;
+    if (name == nullptr) {
+        return -1;
+    }
+    const SDL_Scancode code = SDL_GetScancodeFromName(name);
+    return (code == SDL_SCANCODE_UNKNOWN) ? -1 : static_cast<int>(code);
 }
 
 int EventPump::MouseButtonFromName(const char* name) {
+    if (name == nullptr) {
+        return -1;
+    }
+    if (SDL_strcasecmp(name, "Left") == 0) { return SDL_BUTTON_LEFT; }
+    if (SDL_strcasecmp(name, "Right") == 0) { return SDL_BUTTON_RIGHT; }
+    if (SDL_strcasecmp(name, "Middle") == 0) { return SDL_BUTTON_MIDDLE; }
     return -1;
 }
 
