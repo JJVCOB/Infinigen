@@ -123,7 +123,7 @@ private:
     //Gizmos m_gizmos;
     //MessageBus m_messaging;
     //ScriptLibrary m_scripts;
-    //SceneSubsystem m_sceneSubsystem;
+    SceneSubsystem m_sceneSubsystem;
     //CollisionSubsystem m_collisionSubsystem;
 
     SubsystemStack m_subsystems;

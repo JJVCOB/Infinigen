@@ -53,7 +53,7 @@ bool Engine::InputSubsystem::Init(const BootConfig&) {
     }
     else
     {
-        ENGINE_LOG_WARN(Channels::kInput, "the settings file has no \"input\" section, so no controls are bound.");
+        ENGINE_LOG_WARN(Channels::kInput, "The settings file has no \"input\" section, so no controls are bound.");
     }
     InputMap::PushContext("gameplay");
     return true;
@@ -133,7 +133,7 @@ void Engine::RegisterBuiltinSubsystems(const Options& options)
     //m_subsystems.Add("Gizmos", m_gizmos);
     //m_subsystems.Add("Messaging", m_messaging);
     //m_subsystems.Add("Scripts", m_scripts);
-    //m_subsystems.Add("Scene", m_sceneSubsystem);
+    m_subsystems.Add("Scene", m_sceneSubsystem);
     //m_subsystems.Add("Collision", m_collisionSubsystem);
 }
 

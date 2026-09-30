@@ -1,9 +1,32 @@
 #include <engine/core/Json.h>
+#include <engine/core/Log.h>
 
 namespace eng {
+namespace {
+
+std::string Describe(std::string_view where, std::string_view key) {
+    if (where.empty()) { return std::string(key); }
+    return std::string(where) + "." + std::string(key);
+}
+
+const Json* Lookup(const Json& object, std::string_view key) {
+    if (!object.is_object()) { return nullptr; }
+    const auto it = object.find(std::string(key));
+    return (it != object.end()) ? &(*it) : nullptr;
+}
+
+} // namespace
 
 Json ParseJson(std::string_view text, std::string& outError) {
-    return Json::object();
+    Json document = Json::parse(text, nullptr, false, true);
+
+    if (document.is_discarded()) {
+        outError = "The file is not a valid JSON. Check formatting and try again.";
+        return Json::object();
+    }
+
+    outError.clear();
+    return document;
 }
 
 int ReadInt(const Json& object, std::string_view key, int fallback, std::string_view where) {
