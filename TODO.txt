@@ -1,37 +1,33 @@
-src/
-	Engine.cpp
-
-core/
-	Json.cpp
-
 input/
 	InputMap.cpp
 
-math/
-	Mat3.cpp
-	Overlap.cpp
-	Random.cpp
-	Transform2D.cpp
-
-physics/
-	Collider.cpp
-
-platform/
-	SdlHandles.cpp
+resource/
+	ResourceManager.cpp
 
 render/
 	Camera.cpp
 	Gizmos.cpp
 
-resource/
-	ResourceManager.cpp
+math/
+	Mat3.cpp -- skip
+	Overlap.cpp -- skip
+	Random.cpp -- skip
+	Transform2D.cpp
 
 scene/
-	Component.cpp
+	Messaging.cpp
 	DeferredOps.cpp
 	Entity.cpp
-	Messaging.cpp
+	Component.cpp
+
+physics/
+	Collider.cpp
+
+scene/
 	Scene.cpp
 	ScriptComponent.cpp
 	ScriptLibrary.cpp
 	SystemOrder.cpp
+
+src/
+	Engine.cpp
