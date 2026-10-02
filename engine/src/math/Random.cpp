@@ -1,25 +1,41 @@
+#include <engine/core/Log.h>
 #include <engine/math/Random.h>
+#include <engine/math/Vec2.h>
+#include <cmath>
+#include <utility>
 
 namespace eng {
 
 int Random::NextInt(int lo, int hiInclusive) {
-    return lo;
+    if (lo > hiInclusive) {
+        ENGINE_LOG_WARN(Channels::kCore, "Random::NextInt called with lo={} greater than hi={}, swapping them", lo, hiInclusive);
+        std::swap(lo, hiInclusive);
+    }
+    std::uniform_int_distribution<int> distribution(lo, hiInclusive);
+    return distribution(m_engine);
 }
 
 float Random::NextFloat01() {
-    return 0.0f;
+    std::uniform_real_distribution<float> distribution(0.0f, 1.0f);
+    return distribution(m_engine);
 }
 
 float Random::NextRange(float lo, float hi) {
-    return lo;
+    if (lo > hi) {
+        std::swap(lo, hi);
+    }
+    std::uniform_real_distribution<float> distribution(lo, hi);
+    return distribution(m_engine);
 }
 
 bool Random::NextBool() {
-    return false;
+    std::bernoulli_distribution distribution(0.5);
+    return distribution(m_engine);
 }
 
 Random::UnitVector Random::NextDirection() {
-    return Random::UnitVector{1.0f, 0.0f};
+    const float angle = NextRange(0.0f, kTwoPi);
+    return UnitVector{std::cos(angle), std::sin(angle)};
 }
 
 Random& GlobalRandom() {

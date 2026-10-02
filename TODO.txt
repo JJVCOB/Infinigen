@@ -9,9 +9,6 @@ render/
 	Gizmos.cpp
 
 math/
-	Mat3.cpp -- skip
-	Overlap.cpp -- skip
-	Random.cpp -- skip
 	Transform2D.cpp
 
 scene/
