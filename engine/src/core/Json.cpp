@@ -81,7 +81,7 @@ std::string ReadString(const Json& object, std::string_view key, std::string_vie
         return std::string(fallback);
     }
 
-    if (!value->is_boolean()) {
+    if (!value->is_string()) {
         ENGINE_LOG_WARN(Channels::kConfig, "{} should be a string. Using {}.", Describe(where, key), fallback);
         return std::string(fallback);
     }
