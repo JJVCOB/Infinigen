@@ -15,6 +15,7 @@ std::set<EntityId> g_pendingDestroy;
 
 void DeferredOps::QueueDestroy(EntityId id) {
     if (id.IsNull()) {
+        ENGINE_LOG_WARN(Channels::kScene, "Entity ID was null.");
         return;
     }
     if (!g_pendingDestroy.insert(id).second) {
@@ -34,6 +35,7 @@ void DeferredOps::Apply(Scene& scene) {
     for (const EntityId id : destroys) {
         if (scene.IsValid(id)) {
             scene.DestroyEntityImmediate(id);
+            ENGINE_LOG_INFO(Channels::kScene, "Destroyed entity, ID: {}", id.index);
         }
     }
 

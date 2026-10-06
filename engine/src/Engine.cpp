@@ -279,15 +279,53 @@ bool Engine::BeginFrame() {
     return !m_quitRequested;
 }
 
-void Engine::Simulate() {}
+void Engine::Simulate() {
+    for (int step = 0; step < m_stepsThisFrame; ++step) {
+        const float fixedStep = m_clock.FixedStepSeconds();
 
-void Engine::RenderWorld(Camera& camera, bool includeGizmos) {}
+        // Stages 100-500: Update Gameplay, Movement, Collision
+        SystemScheduler::UpdateRange(0, SystemStage::kCollisionResponse, fixedStep);
 
-void Engine::RenderFrame() {
-    
+        // Stage 500: Deliver Messages
+        MessageBus::Dispatch();
+
+        // Stage 600: Create & Destroy Entities
+        if (m_scene != nullptr) {
+            DeferredOps::Apply(*m_scene);
+        }
+
+        // Stage 700: Update Camera
+        SystemScheduler::UpdateRange(SystemStage::kDeferred + 1, SystemStage::kFirstRenderStage, fixedStep);
+
+        m_clock.OnStepConsumed();
+    }
 }
 
-void Engine::PresentFrame() { Renderer::Present(); }
+void Engine::RenderWorld(Camera& camera, bool includeGizmos) {
+    // Set viewport size
+    camera.SetViewportSize(Renderer::OutputSize());
+
+    // Flush with color, should never be seen
+    Renderer::Clear(Color{20, 20, 30, 255});
+
+    // Render sprites
+    SpriteRenderSystem::Render(camera);
+
+    // Stages 800+: Render anything needed between sprites and gizmos
+    SystemScheduler::RenderPass(m_clock.RealDeltaSeconds());
+
+    // Render gizmos if needed
+    if (includeGizmos) { Gizmos::Render(camera); }
+}
+
+void Engine::RenderFrame() {
+    RenderWorld(m_camera, true);
+    Gizmos::EndFrame(m_clock.RealDeltaSeconds());
+}
+
+void Engine::PresentFrame() {
+    Renderer::Present();
+}
 
 void Engine::Run()
 {
