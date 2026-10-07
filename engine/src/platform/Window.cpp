@@ -90,6 +90,15 @@ void Window::Present() {
     SDL_RenderPresent(m_renderer.get());
 }
 
+void Window::ToggleVSync() {
+    if (m_renderer == nullptr) { return; }
+    int vsync = 1; if (vSyncEnabled) { vsync = 0; }
+    if (!SDL_SetRenderVSync(m_renderer.get(), vsync)) {
+        ENGINE_LOG_WARN(Channels::kPlatform, "VSync is not available: {}", SDL_GetError());
+    }
+    vSyncEnabled = !vSyncEnabled;
+}
+
 void* Window::NativeWindowHandle() const {return m_window.get();}
 void* Window::NativeRendererHandle() const {return m_renderer.get();}
 

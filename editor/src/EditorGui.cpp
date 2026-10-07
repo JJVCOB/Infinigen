@@ -10,6 +10,7 @@
 #include <engine/core/Log.h>
 #include <engine/platform/Window.h>
 #include <engine/tools/GuiHooks.h>
+#include <engine/fs/FileSystem.h>
 
 #include <SDL3/SDL.h>
 
@@ -17,6 +18,8 @@
 #include <imgui_internal.h>          // DockBuilder, used for the default layout
 #include <imgui_impl_sdl3.h>         // the input half of ImGui's SDL support
 #include <imgui_impl_sdlrenderer3.h> // the drawing half
+
+#include <string>
 
 namespace editor {
 namespace {
@@ -74,6 +77,14 @@ bool EditorGui::Init(eng::Window& window) {
     }
 
     ImGuiIO& io = ImGui::GetIO();
+
+    // Load custom font for editor
+    std::vector<std::string> fontList;
+    bool getFonts = eng::FileSystem::ListFiles("fonts", ".ttf", fontList);
+    for (const std::string& font : fontList) { // load all the fonts from the assets file
+        ImFont* customFont = io.Fonts->AddFontFromFileTTF(eng::FileSystem::Resolve(font).c_str(), 18.0f);
+        if (font.ends_with("Roboto-Regular.ttf")) { io.FontDefault = customFont; } // this will be the default font
+    }
 
     // DOCKING IS NOT ON BY DEFAULT. Without this line the panels float freely,
     // cannot be tabbed together, and no arrangement is remembered.

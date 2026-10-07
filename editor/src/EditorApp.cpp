@@ -79,7 +79,7 @@ bool EditorApp::Init() {
     AddPanel(std::make_unique<AssetBrowserPanel>());   // files on disk
     AddPanel(std::make_unique<ConsolePanel>());        // the log
 
-    ENGINE_LOG_INFO(eng::Channels::kEditor, "editor ready with {} panels",
+    ENGINE_LOG_INFO(eng::Channels::kEditor, "Editor ready with {} panels",
                     m_panels.size());
     return true;
 }
@@ -163,8 +163,11 @@ void EditorApp::DrawMenuBar() {
         return;
     }
 
+    ImGuiIO& io = ImGui::GetIO();
+
     if (ImGui::BeginMenu("File")) {
         eng::Scene& scene = eng::Engine::Get().GetScene();
+        
 
         // The list of scenes is DISCOVERED, not written down. Dropping a .json
         // into assets/scenes/ puts it in this menu with no rebuild.
@@ -233,9 +236,11 @@ void EditorApp::DrawMenuBar() {
         ImGui::EndDisabled();
 
         ImGui::Separator();
+
         if (ImGui::MenuItem("Exit")) {
             eng::Engine::Get().RequestQuit();
         }
+
         ImGui::EndMenu();
     }
 
@@ -247,6 +252,25 @@ void EditorApp::DrawMenuBar() {
         }
         ImGui::Separator();
         ImGui::MenuItem("ImGui Demo", nullptr, &EditorState::Get().showImGuiDemo);
+        ImGui::EndMenu();
+    }
+
+    if (ImGui::BeginMenu("Render")) {
+        if (ImGui::MenuItem("VSync", nullptr, eng::Engine::Get().GetWindow().IsVSyncEnabled())) {
+            eng::Engine::Get().GetWindow().ToggleVSync();
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::BeginMenu("Font")) {
+            for (ImFont* font : io.Fonts->Fonts) {
+                if (ImGui::MenuItem(font->GetDebugName(), nullptr, (io.FontDefault == font))) {
+                    io.FontDefault = font;
+                }
+            }
+            ImGui::EndMenu();
+        }
+
         ImGui::EndMenu();
     }
 

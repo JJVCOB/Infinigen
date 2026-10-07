@@ -23,6 +23,9 @@ public:
     void Clear(unsigned char r, unsigned char g, unsigned char b);
     void Present();
 
+    bool IsVSyncEnabled() { return vSyncEnabled; }
+    void ToggleVSync();
+
     void* NativeWindowHandle() const;
     void* NativeRendererHandle() const;
 
@@ -30,6 +33,7 @@ private:
     WindowPtr m_window;
     RendererPtr m_renderer;
     bool m_videoinitialized = false;
+    bool vSyncEnabled = true;
     std::string m_title = "Infinigen";
 };
 
