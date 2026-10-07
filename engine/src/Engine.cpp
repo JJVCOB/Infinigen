@@ -188,7 +188,7 @@ void Engine::Shutdown() {
 
 bool Engine::LoadScene(std::string_view virtualPath, std::string& outError) {
     if (m_scene == nullptr) {
-        outError = "the scene subsystem is not running";
+        outError = "The scene subsystem is not running";
         return false;
     }
     if (!m_scene->Load(virtualPath, outError)) {
@@ -201,14 +201,14 @@ bool Engine::LoadScene(std::string_view virtualPath, std::string& outError) {
 
 bool Engine::SaveScene(std::string_view virtualPath, std::string& outError) {
     if (m_scene == nullptr) {
-        outError = "the scene subsystem is not running";
+        outError = "The scene subsystem is not running";
         return false;
     }
 
     const std::string target =
         virtualPath.empty() ? m_scene->SourcePath() : std::string(virtualPath);
     if (target.empty()) {
-        outError = "this scene has never been saved anywhere; use Save Scene As";
+        outError = "This scene has never been saved anywhere; use Save Scene As";
         return false;
     }
 
@@ -223,7 +223,7 @@ bool Engine::EnterPlayMode(std::string& outError) {
     }
     if (!m_scene->SaveToString(m_playModeSnapshot, outError)) {
         ENGINE_LOG_ERROR(Channels::kEditor,
-                         "cannot enter play mode, because the scene could not be "
+                         "Can not enter play mode, because the scene could not be "
                          "snapshotted: {}",
                          outError);
         return false;
@@ -280,6 +280,8 @@ bool Engine::BeginFrame() {
 }
 
 void Engine::Simulate() {
+    int step = 0;
+
     for (int step = 0; step < m_stepsThisFrame; ++step) {
         const float fixedStep = m_clock.FixedStepSeconds();
 
@@ -298,6 +300,10 @@ void Engine::Simulate() {
         SystemScheduler::UpdateRange(SystemStage::kDeferred + 1, SystemStage::kFirstRenderStage, fixedStep);
 
         m_clock.OnStepConsumed();
+    }
+
+    if (m_scene != nullptr && step == 0) {
+        DeferredOps::Apply(*m_scene);
     }
 }
 

@@ -175,6 +175,7 @@ void HierarchyPanel::DrawRenamePopup() {
 
 void HierarchyPanel::Draw() {
     eng::Scene& scene = eng::Engine::Get().GetScene();
+    const ImGuiIO& io = ImGui::GetIO();
 
     if (ImGui::Button("+ Create Entity")) {
         const eng::EntityId created = scene.CreateEntity(scene.MakeUniqueName("Entity"));
@@ -189,6 +190,18 @@ void HierarchyPanel::Draw() {
             EditorState::Get().dirty    = true;
         }
     }
+
+    // Del - Delete currently selected entity if hierarchy panel is in focus
+    if (ImGui::IsKeyPressed(ImGuiKey_Delete, false) && !io.WantTextInput && ImGui::IsWindowFocused()) {
+        EditorState& state = EditorState::Get();
+        eng::Scene& scene = eng::Engine::Get().GetScene();
+        eng::Entity* entity = scene.Get(state.selected);
+        if (entity != nullptr) {
+            eng::DeferredOps::QueueDestroy(entity->Id());
+            EditorState::Get().dirty = true;
+        }
+    }
+
     ImGui::SameLine();
     ImGui::TextDisabled("(appears where the camera is looking)");
 
