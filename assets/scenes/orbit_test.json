@@ -114,7 +114,7 @@
         },
         {
           "type": "SpriteComponent",
-          "texture": "textures/marker_up.bmp",
+          "texture": "textures/player_test.png",
           "tint": [
             255,
             255,
