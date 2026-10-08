@@ -54,6 +54,14 @@ FetchContent_Declare(SDL3
 
 FetchContent_MakeAvailable(SDL3)
 
+# STB
+FetchContent_Declare(stb
+    GIT_REPOSITORY https://github.com/nothings/stb.git
+    GIT_SHALLOW    TRUE
+    SYSTEM)
+
+FetchContent_MakeAvailable(stb)
+
 # --- doctest -----------------------------------------------------------------
 #  The unit test framework. Header-only, so there is nothing to install, and it
 #  was chosen for how fast it compiles - a test suite that is slow to build is
