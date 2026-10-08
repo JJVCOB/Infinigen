@@ -28,6 +28,9 @@ public:
     static bool ReadTextFile(std::string_view virtualPath, std::string& outText, std::string& outError);
     static bool ReadFile(std::string_view virtualPath, std::vector<unsigned char>& outBytes, std::string& outError);
     static bool WriteTextFile(std::string_view virtualPath, std::string_view text, std::string& outError);
+
+    static void OpenFileInAssociatedProgram(std::string_view virtualPath);
+    static void OpenFileInExplorer(std::string_view virtualPath);
 };
 
 } // namespace eng

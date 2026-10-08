@@ -55,7 +55,7 @@ else()
     message(STATUS "engine: ${ENGINE_SOURCE_COUNT} source file(s) found under src/")
 endif()
 
-add_library(engine SHARED ${ENGINE_SOURCES} ${ENGINE_HEADERS})
+add_library(engine SHARED ${ENGINE_SOURCES} ${ENGINE_HEADERS}  )
 add_library(Engine2D::engine ALIAS engine)
 
 # Keeps the folder layout in the IDE's project tree instead of one flat list.

@@ -268,7 +268,7 @@ void EditorGui::BeginDockspace() {
                 ImGui::DockBuilderSplitNode(centre, ImGuiDir_Down, 0.30f, nullptr, &centre);
 
             ImGui::DockBuilderDockWindow("Toolbar", top);
-            ImGui::DockBuilderDockWindow("Hierarchy", left);
+            ImGui::DockBuilderDockWindow("Hierarchy", right);
             ImGui::DockBuilderDockWindow("Inspector", right);
 
             // Scene is docked FIRST so it is the tab showing on a first run -

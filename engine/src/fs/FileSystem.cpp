@@ -241,4 +241,16 @@ bool FileSystem::WriteTextFile(std::string_view virtualPath, std::string_view te
     return true;
 }
 
+void FileSystem::OpenFileInAssociatedProgram(std::string_view virtualPath) {
+    const std::string filePath = Resolve(virtualPath);
+    std::string command = "start \"\" \"" + filePath + "\"";
+    std::system(command.c_str());
+}
+
+void FileSystem::OpenFileInExplorer(std::string_view virtualPath) {
+    const std::string filePath = Resolve(virtualPath);
+    std::string command = "explorer.exe /select,\"" + filePath + "\"";
+    std::system(command.c_str());
+}
+
 } // namespace eng

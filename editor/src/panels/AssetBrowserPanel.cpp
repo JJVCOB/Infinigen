@@ -271,6 +271,20 @@ void AssetBrowserPanel::DrawEntry(const eng::FileSystem::DirEntry& entry, int in
             // entity, and other panels are still using them this frame. See
             // EditorState::requestedScene.
             EditorState::Get().requestedScene = entry.virtualPath;
+        } else if (kind == AssetKind::Texture || kind == AssetKind::Script) {
+            eng::FileSystem::OpenFileInAssociatedProgram(entry.virtualPath);
+        }
+    }
+
+    if (!iconClicked && !entry.isDirectory) {
+        if (ImGui::BeginPopupContextItem("AssetContextMenu")) {
+            if (ImGui::MenuItem("Open File")) {
+                eng::FileSystem::OpenFileInAssociatedProgram(entry.virtualPath);
+            }
+            if (ImGui::MenuItem("View in File Explorer")) {
+                eng::FileSystem::OpenFileInExplorer(entry.virtualPath);
+            }
+            ImGui::EndPopup();
         }
     }
 

@@ -17,7 +17,8 @@ void LogBuffer::SetCapacity(std::size_t capacity) {
     g_capacity = capacity;
     g_ring.clear();
     g_ring.shrink_to_fit();
-    g_head, g_size = 0;
+    g_head = 0;
+    g_size = 0;
 }
 
 std::size_t LogBuffer::Capacity() { return g_capacity; }

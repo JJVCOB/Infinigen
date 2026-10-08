@@ -50,7 +50,7 @@ void ConsolePanel::Draw() {
     // ---- the filter bar along the top ------------------------------------
     static const char* kLevelNames[] = {"Info", "Warning", "Error"};
     ImGui::SetNextItemWidth(110.0f);
-    ImGui::Combo("Show", &m_minLevel, kLevelNames, IM_ARRAYSIZE(kLevelNames));
+    ImGui::Combo("Search", &m_minLevel, kLevelNames, IM_ARRAYSIZE(kLevelNames));
 
     ImGui::SameLine();
     ImGui::SetNextItemWidth(220.0f);
@@ -115,9 +115,13 @@ void ConsolePanel::Draw() {
                 continue;
             }
 
-            ImGui::TextColored(ColorFor(record.level), "[%8.3f] [%-7s] [%-11s] %s",
+            ImGui::TextColored(ColorFor(record.level), "[%.3f] [%s] [%s] %s",
                                record.timeSeconds, eng::ToString(record.level),
                                record.channel.c_str(), record.message.c_str());
+
+            //ImGui::TextColored(ColorFor(record.level), "[%8.3f] [%-7s] [%-11s] %s",
+            //                   record.timeSeconds, eng::ToString(record.level),
+            //                   record.channel.c_str(), record.message.c_str());
         }
 
         // Follow the newest message, but ONLY when the view is already at the
