@@ -58,7 +58,7 @@ bool RenderTarget::Resize(int width, int height) {
     if (m_texture != nullptr && width == m_width && height == m_height) { return true; } // already the right size
     if (g_renderer == nullptr) { return false; } 
 
-    m_texture.reset(SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height));
+    m_texture.reset(SDL_CreateTexture(g_renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, width, height));
 
     if (m_texture == nullptr) {
         ENGINE_LOG_ERROR(Channels::kRender, "Could not create a {}x{} view: {}", width, height, SDL_GetError());
@@ -66,7 +66,6 @@ bool RenderTarget::Resize(int width, int height) {
         return false;
     }
 
-    SDL_SetTextureScaleMode(m_texture.get(), SDL_SCALEMODE_PIXELART);
     m_width = width;
     m_height = height;
     return true;
@@ -147,6 +146,7 @@ void Renderer::DrawSprite(const TextureRef& texture, Vec2 center, Vec2 size, flo
     if (!texture || texture->native == nullptr) { return; }
 
     auto* sdlTexture = static_cast<SDL_Texture*>(texture->native);
+    SDL_SetTextureScaleMode(sdlTexture, SDL_SCALEMODE_PIXELART);
     SDL_SetTextureColorMod(sdlTexture, tint.r, tint.g, tint.b);
     SDL_SetTextureAlphaMod(sdlTexture, tint.a);
     SDL_SetTextureBlendMode(sdlTexture, SDL_BLENDMODE_BLEND);

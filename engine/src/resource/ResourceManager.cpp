@@ -7,6 +7,9 @@
 #include <unordered_map>
 #include <vector>
 
+#define STBI_NO_STDIO
+#include <stb_image.h>
+
 namespace eng {
 
 namespace {
@@ -24,36 +27,47 @@ TextureRef CreateTextureFromFile(std::string_view virtualPath, std::string& outE
         return nullptr;
     }
 
-    SDL_IOStream* stream = SDL_IOFromConstMem(bytes.data(), bytes.size());
-    if (stream == nullptr) {
-        outError = SDL_GetError();
-        return nullptr;
-    }
-
-    SurfacePtr surface(SDL_LoadBMP_IO(stream, true));
-    if (surface == nullptr) {
-        outError = SDL_GetError();
+    int width = 0;
+    int height = 0;
+    int channelsInFile = 0;
+    unsigned char* pixels = stbi_load_from_memory(bytes.data(), static_cast<int>(bytes.size()),
+                                                  &width, &height, &channelsInFile, 4);
+    if (pixels == nullptr) {
+        outError = stbi_failure_reason() != nullptr ? stbi_failure_reason()
+                                                    : "the image could not be decoded";
         return nullptr;
     }
 
     auto* renderer = static_cast<SDL_Renderer*>(Renderer::NativeRendererHandle());
     if (renderer == nullptr) {
+        stbi_image_free(pixels);
         outError = "there is no renderer yet, so textures cannot be created";
         return nullptr;
     }
 
-    SDL_Texture* native = SDL_CreateTextureFromSurface(renderer, surface.get());
+    SDL_Texture* native = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, width, height);
+
     if (native == nullptr) {
+        stbi_image_free(pixels);
         outError = SDL_GetError();
         return nullptr;
     }
 
-    SDL_SetTextureScaleMode(native, SDL_SCALEMODE_NEAREST);
+    // The pitch is how many bytes one row of the image takes: four per pixel.
+    const bool uploaded = SDL_UpdateTexture(native, nullptr, pixels, width * 4);
+
+    stbi_image_free(pixels);
+
+    if (!uploaded) {
+        SDL_DestroyTexture(native);
+        outError = SDL_GetError();
+        return nullptr;
+    }
 
     TextureRef texture = std::make_shared<Texture>();
     texture->path = std::string(virtualPath);
-    texture->width = surface->w;
-    texture->height = surface->h;
+    texture->width = width;
+    texture->height = height;
     texture->native = native;
     return texture;
 }
