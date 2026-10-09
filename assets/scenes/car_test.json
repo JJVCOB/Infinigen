@@ -1,0 +1,143 @@
+{
+  "_comment": "An example scene. 22 entities and 3 different images. The eighteen asteroids all use the same picture, so it is loaded once and shared - open the Inspector on one of them and look at how many things are sharing it.",
+  "_hierarchy_note": "SolarRoot -> Planet -> Moon is three levels deep on purpose. Only the root, the planet and the moon have a SpinComponent; the orbiting is produced entirely by the parent/child transform tree.",
+  "_motion_note": "SolarRoot spins, so Planet - its child, 160 units out - ORBITS the origin. Planet spins, so Moon orbits the Planet and the Planet visibly turns. Moon spins backwards on its own axis. There is no orbit code anywhere: a child's position in the world is worked out through its parent, so spinning a parent sweeps its children round with it. All of it comes from this file.",
+  "camera": {
+    "position": [
+      0.0,
+      0.0
+    ],
+    "zoom": 1.0
+  },
+  "entities": [
+    {
+      "components": [
+        {
+          "position": [
+            0.0,
+            0.0
+          ],
+          "rotation": 0.0,
+          "scale": [
+            0.5,
+            0.5
+          ],
+          "type": "TransformComponent"
+        },
+        {
+          "layer": 1,
+          "texture": "textures/car_hq.png",
+          "tint": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "type": "SpriteComponent"
+        },
+        {
+          "script": "CarMovement",
+          "type": "ScriptComponent"
+        }
+      ],
+      "name": "Car"
+    },
+    {
+      "components": [
+        {
+          "position": [
+            0.0,
+            0.0
+          ],
+          "rotation": 0.0,
+          "scale": [
+            1.0,
+            1.0
+          ],
+          "type": "TransformComponent"
+        },
+        {
+          "layer": 0,
+          "texture": "textures/road.png",
+          "tint": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "type": "SpriteComponent"
+        },
+        {
+          "script": "RoadMove",
+          "type": "ScriptComponent"
+        }
+      ],
+      "name": "Road"
+    },
+    {
+      "components": [
+        {
+          "position": [
+            0.0,
+            650.0
+          ],
+          "rotation": 0.0,
+          "scale": [
+            1.0,
+            1.0
+          ],
+          "type": "TransformComponent"
+        },
+        {
+          "layer": 0,
+          "texture": "textures/road.png",
+          "tint": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "type": "SpriteComponent"
+        },
+        {
+          "script": "RoadMove",
+          "type": "ScriptComponent"
+        }
+      ],
+      "name": "Road_1"
+    },
+    {
+      "components": [
+        {
+          "position": [
+            0.0,
+            -650.0
+          ],
+          "rotation": 0.0,
+          "scale": [
+            1.0,
+            1.0
+          ],
+          "type": "TransformComponent"
+        },
+        {
+          "layer": 0,
+          "texture": "textures/road.png",
+          "tint": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "type": "SpriteComponent"
+        },
+        {
+          "script": "RoadMove",
+          "type": "ScriptComponent"
+        }
+      ],
+      "name": "Road_1_1"
+    }
+  ],
+  "name": "Untitled"
+}
