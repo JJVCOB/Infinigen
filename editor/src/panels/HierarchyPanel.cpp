@@ -13,6 +13,12 @@
 
 namespace editor {
 
+struct PendingReparent {
+    eng::EntityId child;
+    eng::EntityId newParent;
+};
+std::optional<PendingReparent> m_pendingReparent;
+
 void HierarchyPanel::DrawNode(eng::Entity& entity) {
     EditorState&      state     = EditorState::Get();
     eng::Scene&       scene     = eng::Engine::Get().GetScene();
@@ -47,20 +53,34 @@ void HierarchyPanel::DrawNode(eng::Entity& entity) {
     }
 
     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
-        ImGui::SetDragDropPayload("Entity", entity.Name().c_str(), sizeof(entity.Name()));
+        ImGui::SetDragDropPayload("Entity", entity.Name().c_str(), sizeof(entity.Name()) + 1);
         ImGui::TextUnformatted(entity.Name().c_str());
         ImGui::EndDragDropSource();
     }
 
+    //if (ImGui::BeginDragDropTarget()) {
+    //    const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity");
+    //    if (payload != nullptr) {
+    //        const auto& otherEntityName = static_cast<const char*>(payload->Data);
+    //        eng::EntityId otherEntityId = scene.Find(otherEntityName);
+    //        eng::Entity* otherEntity = scene.Get(otherEntityId);
+    //        if (otherEntity != nullptr && otherEntity != &entity) {
+    //            eng::Transform2D& otherTransform = otherEntity->Transform();
+    //            eng::Transform2D* transformPtr = std::addressof(transform);
+    //            // set parent of entity to otherentity. function does not seem to exist yet
+    //            otherTransform.SetParent(transformPtr);
+    //        }
+    //    }
+    //    ImGui::EndDragDropTarget();
+    //}
+
     if (ImGui::BeginDragDropTarget()) {
-        const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity");
-        if (payload != nullptr) {
-            const auto* otherEntityName = static_cast<const char*>(payload->Data);
-            eng::EntityId otherEntityId = scene.Find(otherEntityName);
-            eng::Entity* otherEntity = scene.Get(otherEntityId);
-            if (otherEntity != nullptr) {
-                // set parent of entity to otherentity. function does not seem to exist yet  
-                //entity.Transform().SetParent(otherEntity->Transform());
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity")) {
+            std::string name(static_cast<const char*>(payload->Data),
+                             payload->DataSize); // don't trust null termination
+            eng::EntityId otherId = scene.Find(name.c_str());
+            if (otherId != /*invalid id*/ eng::EntityId{} && otherId != entity.Id()) {
+                m_pendingReparent = PendingReparent{otherId, entity.Id()};
             }
         }
         ImGui::EndDragDropTarget();
@@ -86,9 +106,10 @@ void HierarchyPanel::DrawNode(eng::Entity& entity) {
                 }
             });
             if (childEntity != nullptr) {
-                DrawNode(*childEntity);   // recursion: a child may have children
+                DrawNode(*childEntity); // recursion: a child may have children
             }
         }
+
         ImGui::TreePop();
     }
 }
@@ -231,52 +252,83 @@ void HierarchyPanel::Draw() {
     ImGui::TextDisabled("%zu entities", scene.EntityCount());
     ImGui::Separator();
 
-    const bool filtering = m_filter[0] != '\0';
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth |
+                               ImGuiTreeNodeFlags_DefaultOpen;
 
-    if (filtering) {
-        // A flat list while filtering. A tree with most of its branches hidden
-        // is harder to read than a list, and the point of a filter is to find
-        // one thing.
-        scene.ForEach([&](eng::Entity& entity) {
-            if (entity.Name().find(m_filter) == std::string::npos) {
-                return;
+    const bool open = ImGui::TreeNodeEx("Workspace", flags);
+
+    if (ImGui::BeginDragDropTarget()) {
+        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity")) {
+            std::string name(static_cast<const char*>(payload->Data),
+                             payload->DataSize); // don't trust null termination
+            eng::EntityId otherId = scene.Find(name.c_str());
+            if (otherId != eng::EntityId{}) {
+                m_pendingReparent = PendingReparent{otherId, eng::EntityId()};
             }
-            char label[192];
-            std::snprintf(label, sizeof(label), "%s##%d_%d", entity.Name().c_str(),
-                          entity.Id().index, entity.Id().generation);
-            if (ImGui::Selectable(label, EditorState::Get().selected == entity.Id())) {
-                EditorState::Get().selected = entity.Id();
-            }
-            DrawContextMenu(entity);
-        });
-    } else {
-        // Only the entities with no parent are drawn here; DrawNode draws each
-        // one's children itself.
-        scene.ForEach([&](eng::Entity& entity) {
-            if (entity.Transform().Parent() == nullptr) {
-                DrawNode(entity);
-            }
-        });
+        }
+        ImGui::EndDragDropTarget();
     }
 
-    // Outline whatever is selected, in the Scene view.
-    //
-    // Looked up from the ID every frame, which is the rule. A selection that
-    // was destroyed simply comes back as nothing and no outline is drawn.
-    if (eng::Entity* selected = scene.Get(EditorState::Get().selected);
-        selected != nullptr) {
-        const eng::Vec2 position = selected->Transform().WorldPosition();
-        eng::Gizmos::Box(
-            eng::AABB::FromCenterHalfExtents(position, eng::Vec2{22.0f, 22.0f}),
-            eng::Color::Yellow(), 0.0f, eng::GizmoSpace::World,
-            eng::GizmoCategory::Bounds);
+    const bool filtering = m_filter[0] != '\0';
 
-        // ABOVE the outline rather than beside it. Beside it is where the
-        // Scene view puts its move handle, and a name label sitting on top of
-        // the handle you are trying to grab makes a tool feel broken.
-        eng::Gizmos::Text(position + eng::Vec2{-20.0f, 34.0f}, selected->Name(),
-                          eng::Color::Yellow(), 0.0f, eng::GizmoSpace::World,
-                          eng::GizmoCategory::Bounds);
+    if (open) {
+        if (filtering) {
+            // A flat list while filtering. A tree with most of its branches hidden
+            // is harder to read than a list, and the point of a filter is to find
+            // one thing.
+            scene.ForEach([&](eng::Entity& entity) {
+                if (entity.Name().find(m_filter) == std::string::npos) {
+                    return;
+                }
+                char label[192];
+                std::snprintf(label, sizeof(label), "%s##%d_%d", entity.Name().c_str(),
+                              entity.Id().index, entity.Id().generation);
+                if (ImGui::Selectable(label, EditorState::Get().selected == entity.Id())) {
+                    EditorState::Get().selected = entity.Id();
+                }
+                DrawContextMenu(entity);
+            });
+        } else {
+            // Only the entities with no parent are drawn here; DrawNode draws each
+            // one's children itself.
+            scene.ForEach([&](eng::Entity& entity) {
+                if (entity.Transform().Parent() == nullptr) {
+                    DrawNode(entity);
+                }
+            });
+        }
+
+        // Outline whatever is selected, in the Scene view.
+        //
+        // Looked up from the ID every frame, which is the rule. A selection that
+        // was destroyed simply comes back as nothing and no outline is drawn.
+        if (eng::Entity* selected = scene.Get(EditorState::Get().selected); selected != nullptr) {
+            const eng::Vec2 position = selected->Transform().WorldPosition();
+            eng::Gizmos::Box(eng::AABB::FromCenterHalfExtents(position, eng::Vec2{22.0f, 22.0f}),
+                             eng::Color::Yellow(), 0.0f, eng::GizmoSpace::World,
+                             eng::GizmoCategory::Bounds);
+
+            // ABOVE the outline rather than beside it. Beside it is where the
+            // Scene view puts its move handle, and a name label sitting on top of
+            // the handle you are trying to grab makes a tool feel broken.
+            eng::Gizmos::Text(position + eng::Vec2{-20.0f, 34.0f}, selected->Name(),
+                              eng::Color::Yellow(), 0.0f, eng::GizmoSpace::World,
+                              eng::GizmoCategory::Bounds);
+        }
+
+        ImGui::TreePop();
+    }
+
+    if (m_pendingReparent) {
+        eng::Entity* child = scene.Get(m_pendingReparent->child);
+        eng::Entity* parent = scene.Get(m_pendingReparent->newParent);
+        if (child && parent) {
+            child->Transform().SetParent(&parent->Transform(), true);
+        }
+        if (m_pendingReparent->newParent == eng::EntityId{}) {
+            child->Transform().SetParent(nullptr, true);
+        }
+        m_pendingReparent.reset();
     }
 
     DrawRenamePopup();
