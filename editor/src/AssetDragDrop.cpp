@@ -76,8 +76,7 @@ std::string ScriptNameFromPath(std::string_view virtualPath) {
     return std::string(name);
 }
 
-bool ApplyAssetToEntity(eng::EntityId target, std::string_view virtualPath,
-                        std::string& outMessage) {
+bool ApplyAssetToEntity(eng::EntityId target, std::string_view virtualPath, std::string& outMessage) {
     eng::Scene&  scene  = eng::Engine::Get().GetScene();
     eng::Entity* entity = scene.Get(target);
     if (entity == nullptr) {

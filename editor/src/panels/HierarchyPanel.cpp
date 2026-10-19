@@ -46,6 +46,26 @@ void HierarchyPanel::DrawNode(eng::Entity& entity) {
         state.selected = entity.Id();   // an ID. Never a pointer.
     }
 
+    if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID)) {
+        ImGui::SetDragDropPayload("Entity", entity.Name().c_str(), sizeof(entity.Name()));
+        ImGui::TextUnformatted(entity.Name().c_str());
+        ImGui::EndDragDropSource();
+    }
+
+    if (ImGui::BeginDragDropTarget()) {
+        const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Entity");
+        if (payload != nullptr) {
+            const auto* otherEntityName = static_cast<const char*>(payload->Data);
+            eng::EntityId otherEntityId = scene.Find(otherEntityName);
+            eng::Entity* otherEntity = scene.Get(otherEntityId);
+            if (otherEntity != nullptr) {
+                // set parent of entity to otherentity. function does not seem to exist yet  
+                //entity.Transform().SetParent(otherEntity->Transform());
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+
     // A drop target for this row, placed immediately after the row was drawn
     // because ImGui attaches drop targets to the most recently drawn item.
     // Drop a texture here to give this entity a sprite; drop a .cpp to attach
