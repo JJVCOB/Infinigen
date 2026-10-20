@@ -89,13 +89,14 @@ public:
 
         const eng::Vec2 currentPos = transform->WorldPosition();
 
-        if (currentPos.y < -975) {
-            transform->SetWorldPosition(currentPos + Vec2{0, (975*2)});
+        if (currentPos.y < -maxY) {
+            transform->SetWorldPosition(currentPos + Vec2{0, (maxY * 2)});
         }
 
         const eng::Vec2 direction = Vec2{0, -1};
+        const eng::Vec2 moveDir = eng::InputMap::GetAxis2D("MoveLeft", "MoveRight", "MoveDown", "MoveUp");
 
-        transform->Translate(direction * std::round(kSpeed * deltaSeconds));
+        transform->Translate(direction * std::round((kSpeed + (moveDir.y * moveInfluence)) * deltaSeconds));
 
 
         // Replace this with whatever your script should do. It is here so that
@@ -124,7 +125,9 @@ public:
 
 private:
     float m_secondsAlive = 0.0f;
-    static constexpr float kSpeed = 900.0f;
+    float maxY = 1950.0f;
+    static constexpr float moveInfluence = 200.0f;
+    static constexpr float kSpeed = 1000.0f;
 };
 
 } // namespace

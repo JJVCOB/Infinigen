@@ -79,6 +79,35 @@
         {
           "position": [
             0.0,
+            1300.0
+          ],
+          "rotation": 0.0,
+          "scale": [
+            1.0,
+            1.0
+          ],
+          "type": "TransformComponent"
+        },
+        {
+          "layer": 0,
+          "texture": "textures/road.png",
+          "tint": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "type": "SpriteComponent"
+        }
+      ],
+      "name": "RoadTop2",
+      "parent": "Road"
+    },
+    {
+      "components": [
+        {
+          "position": [
+            0.0,
             650.0
           ],
           "rotation": 0.0,
@@ -98,13 +127,10 @@
             255
           ],
           "type": "SpriteComponent"
-        },
-        {
-          "script": "RoadMove",
-          "type": "ScriptComponent"
         }
       ],
-      "name": "Road_1"
+      "name": "RoadTop1",
+      "parent": "Road"
     },
     {
       "components": [
@@ -130,13 +156,155 @@
             255
           ],
           "type": "SpriteComponent"
-        },
-        {
-          "script": "RoadMove",
-          "type": "ScriptComponent"
         }
       ],
-      "name": "Road_1_1"
+      "name": "RoadBottom1",
+      "parent": "Road"
+    },
+    {
+      "components": [
+        {
+          "position": [
+            0.0,
+            -1300.0
+          ],
+          "rotation": 0.0,
+          "scale": [
+            1.0,
+            1.0
+          ],
+          "type": "TransformComponent"
+        },
+        {
+          "layer": 0,
+          "texture": "textures/road.png",
+          "tint": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "type": "SpriteComponent"
+        }
+      ],
+      "name": "RoadBottom2",
+      "parent": "Road"
+    },
+    {
+      "components": [
+        {
+          "position": [
+            0.0,
+            1950.0
+          ],
+          "rotation": 0.0,
+          "scale": [
+            1.0,
+            1.0
+          ],
+          "type": "TransformComponent"
+        },
+        {
+          "layer": 0,
+          "texture": "textures/road.png",
+          "tint": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "type": "SpriteComponent"
+        }
+      ],
+      "name": "RoadTop3",
+      "parent": "Road"
+    },
+    {
+      "components": [
+        {
+          "position": [
+            0.0,
+            -1950.0
+          ],
+          "rotation": 0.0,
+          "scale": [
+            1.0,
+            1.0
+          ],
+          "type": "TransformComponent"
+        },
+        {
+          "layer": 0,
+          "texture": "textures/road.png",
+          "tint": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "type": "SpriteComponent"
+        }
+      ],
+      "name": "RoadBottom3",
+      "parent": "Road"
+    },
+    {
+      "components": [
+        {
+          "position": [
+            0.0,
+            2600.0
+          ],
+          "rotation": 0.0,
+          "scale": [
+            1.0,
+            1.0
+          ],
+          "type": "TransformComponent"
+        },
+        {
+          "layer": 0,
+          "texture": "textures/road.png",
+          "tint": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "type": "SpriteComponent"
+        }
+      ],
+      "name": "RoadTop4",
+      "parent": "Road"
+    },
+    {
+      "components": [
+        {
+          "position": [
+            0.0,
+            -2600.0
+          ],
+          "rotation": 0.0,
+          "scale": [
+            1.0,
+            1.0
+          ],
+          "type": "TransformComponent"
+        },
+        {
+          "layer": 0,
+          "texture": "textures/road.png",
+          "tint": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "type": "SpriteComponent"
+        }
+      ],
+      "name": "RoadBottom4",
+      "parent": "Road"
     }
   ],
   "name": "Untitled"
