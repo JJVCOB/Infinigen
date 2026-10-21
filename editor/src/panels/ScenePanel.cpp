@@ -187,8 +187,7 @@ void ScenePanel::Draw() {
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(kPayloadTexture)) {
             const auto*     path  = static_cast<const char*>(payload->Data);
             const ImVec2    mouse = ImGui::GetIO().MousePos;
-            const eng::Vec2 world = m_camera.ScreenToWorld(
-                eng::Vec2{mouse.x - m_imageOrigin.x, mouse.y - m_imageOrigin.y});
+            const eng::Vec2 world = m_camera.ScreenToWorld(eng::Vec2{mouse.x - m_imageOrigin.x, mouse.y - m_imageOrigin.y});
 
             std::string        message;
             const eng::EntityId created = CreateEntityForAsset(path, world, message);
@@ -412,6 +411,11 @@ void ScenePanel::UpdateGizmo(const ImVec2& imageOrigin) {
     }
     if (m_dragAxis == GizmoAxis::Y || m_dragAxis == GizmoAxis::Both) {
         next.y = target.y;
+    }
+
+    if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl)) { // round vec2 if holding ctrl
+        next.x = std::roundf(next.x);
+        next.y = std::roundf(next.y);
     }
 
     // SetWorldPosition rather than SetLocalPosition. Dragging a child of a
